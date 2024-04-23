@@ -19,7 +19,18 @@ public class ParseEntitiesTests {
     @Test
     void testParseLocations() throws FileNotFoundException, ParseException {
         GameModel gameModel = new GameModel();
-        gameModel.StoreLocations();
-        gameModel.PrintLocations();
+        Graph wholeDocument = gameModel.parseEntities();
+        gameModel.storeLocations(wholeDocument);
+        gameModel.printLocations();
     }
+
+    @Test
+    void testParseArtefacts() throws FileNotFoundException, ParseException {
+        GameModel gameModel = new GameModel();
+        Graph wholeDocument = gameModel.parseEntities();
+        Location dummyLocation = new Location("cabin", "A log cabin in the woods");
+        gameModel.storeArtefacts(wholeDocument, dummyLocation);
+    }
+
+
 }

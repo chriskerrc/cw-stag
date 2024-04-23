@@ -6,9 +6,26 @@ public class Location extends GameEntity {
 
     ArrayList<Artefact> artefactList = new ArrayList<>();
     ArrayList<Furniture> furnitureList = new ArrayList<>();
+    ArrayList<Character> characterList = new ArrayList<>();
 
     public Location(String name, String description) {
         super(name, description);
     }
+
+    //add paths to locations
+
+    public void addArtefact(Artefact newArtefact){
+        artefactList.add(newArtefact);
+    }
+
+    public void addFurniture(Furniture newFurniture){
+        furnitureList.add(newFurniture);
+    }
+
+    public void addCharacter(Character newCharacter){
+        characterList.add(newCharacter);
+    }
+
+    //add methods to remove artefacts
 
 }
