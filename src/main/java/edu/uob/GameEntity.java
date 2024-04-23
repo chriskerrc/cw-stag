@@ -7,13 +7,11 @@ public abstract class GameEntity
     private String name;
     private String description;
 
-    private ArrayList<String> entityList;
 
-    public GameEntity(String name, String description, ArrayList<String> entityList)
+    public GameEntity(String name, String description)
     {
         this.name = name;
         this.description = description;
-        this.entityList = entityList;
     }
 
     public String getName()

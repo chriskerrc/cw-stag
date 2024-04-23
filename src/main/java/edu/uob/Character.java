@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Character extends GameEntity{
 
-    public Character(String name, String description, ArrayList<String> entityList) {
-        super(name, description, entityList);
+    public Character(String name, String description) {
+        super(name, description);
     }
 }
