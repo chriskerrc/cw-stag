@@ -4,16 +4,19 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 
 import com.alexmerz.graphviz.ParseException;
 import com.alexmerz.graphviz.Parser;
+import com.alexmerz.graphviz.objects.Edge;
 import com.alexmerz.graphviz.objects.Graph;
 import com.alexmerz.graphviz.objects.Node;
 
 public class GameModel {
 
     ArrayList<Location> locationsList = new ArrayList<>();
+    HashMap<Location, Location> pathsMap = new HashMap<>();
 
     public Graph parseEntities() throws FileNotFoundException, ParseException {
         Parser parser = new Parser();
@@ -39,6 +42,7 @@ public class GameModel {
             processLocationObjects(graphLocation, location);
             locationsList.add(location);
         }
+        storePaths(graphSections);
     }
 
 
@@ -84,6 +88,22 @@ public class GameModel {
         }
     }
 
+    //the HashMap<Location,Location> assumes each location will only have one destination
+    //this is OK for basic entities but will need to be refactored for extended entities
+    //for example, forest has both cabin and riverbank as destinations
+    private void storePaths(ArrayList<Graph> graphSections){
+        ArrayList<Edge> paths = graphSections.get(1).getEdges();
+        for(Edge edge : paths){
+            Node fromLocation = edge.getSource().getNode();
+            String fromName = fromLocation.getId().getId();
+            Location startLocation = getLocationFromName(fromName);
+            Node toLocation = edge.getTarget().getNode();
+            String toName = toLocation.getId().getId();
+            Location endLocation = getLocationFromName(toName);
+            pathsMap.put(startLocation,endLocation);
+        }
+    }
+
     public Location getLocationFromName(String locationName){
         for(Location location : locationsList){
             if(Objects.equals(location.getName(), locationName)){
@@ -91,6 +111,10 @@ public class GameModel {
             }
         }
         return null;
+    }
+
+    public Location getDestinationsFromLocation(Location startLocation){
+        return pathsMap.get(startLocation);
     }
 
 }

@@ -67,6 +67,28 @@ public class ParseEntitiesTests {
         //check key isn't in cellar
         Artefact nullKey = cellar.getArtefactFromName("potion");
         assertNull(nullKey);
+
+        //get storeroom location
+        Location storeroom = gameModel.getLocationFromName("storeroom");
+        //check location name and description
+        assertEquals("storeroom", storeroom.getName());
+        assertEquals("Storage for any entities not placed in the game", storeroom.getDescription());
+        //check artefacts
+        Artefact log = storeroom.getArtefactFromName("log");
+        assertEquals("log", log.getName());
+        assertEquals("A heavy wooden log", log.getDescription());
+        //check there are no characters
+        assertTrue(storeroom.isCharacterListEmpty());
+        //check there is no furniture
+        assertTrue(storeroom.isFurnitureListEmpty());
+
+        //paths
+        Location cabinDestination = gameModel.getDestinationsFromLocation(cabin);
+        assertEquals("forest", cabinDestination.getName());
+        Location forestDestination = gameModel.getDestinationsFromLocation(forest);
+        assertEquals("cabin", forestDestination.getName());
+        Location cellarDestination = gameModel.getDestinationsFromLocation(cellar);
+        assertEquals("cabin", cellarDestination.getName());
     }
 
 
