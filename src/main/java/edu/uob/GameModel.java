@@ -22,8 +22,7 @@ public class GameModel {
         return parser.getGraphs().get(0);
     }
 
-    //currently, these locations are stored empty (no artefacts or furniture)
-    public void storeLocations(Graph wholeDocument) throws FileNotFoundException, ParseException {
+    public void storeLocations(Graph wholeDocument) {
         ArrayList<Graph> graphSections = wholeDocument.getSubgraphs();
         ArrayList<Graph> graphLocations = graphSections.get(0).getSubgraphs();
         Graph graphLocation;
@@ -37,40 +36,52 @@ public class GameModel {
             locationDescription = locationDetails.getAttribute("description");
             Location location = new Location(locationName, locationDescription);
             //add artefacts, characters, furniture
-            findArtefacts(graphLocation, location);
+            processLocationObjects(graphLocation, location);
             locationsList.add(location);
         }
     }
 
-    //improve names of these methods
-    public void findArtefacts(Graph graphLocation, Location location){
+
+    //maybe simplify this method
+    private void processLocationObjects(Graph graphLocation, Location location){
         ArrayList<Graph> subGraphs = graphLocation.getSubgraphs();
-        ArrayList<Node> artefactNodes;
+        ArrayList<Node> objectNodes;
         for(Graph graph : subGraphs){
             if(Objects.equals(graph.getId().getId(), "artefacts")){
-                artefactNodes = graph.getNodes(true);
-                storeArtefacts(artefactNodes, location);
+                objectNodes = graph.getNodes(true);
+                storeObjects(objectNodes, location, "artefacts");
+            }
+            if(Objects.equals(graph.getId().getId(), "furniture")){
+                objectNodes = graph.getNodes(true);
+                storeObjects(objectNodes, location, "furniture");
+            }
+            if(Objects.equals(graph.getId().getId(), "characters")){
+                objectNodes = graph.getNodes(true);
+                storeObjects(objectNodes, location, "characters");
             }
         }
     }
 
-    public void storeArtefacts(ArrayList<Node> artefactNodes, Location location){
-        String artefactName;
-        String artefactDescription;
-        for (Node artefactNode : artefactNodes) {
-            artefactName = artefactNode.getId().getId();
-            artefactDescription = artefactNode.getAttribute("description");
-            Artefact artefact = new Artefact(artefactName, artefactDescription);
-            location.addArtefact(artefact);
+    //maybe simplify this method
+    private void storeObjects(ArrayList<Node> objectNodes, Location location, String objectType){
+        String objectName;
+        String objectDescription;
+        for (Node objectNode : objectNodes) {
+            objectName = objectNode.getId().getId();
+            objectDescription = objectNode.getAttribute("description");
+            if(Objects.equals(objectType, "artefacts")) {
+                Artefact artefact = new Artefact(objectName, objectDescription);
+                location.addArtefact(artefact);
+            }
+            if(Objects.equals(objectType, "furniture")) {
+                Furniture furniture = new Furniture(objectName, objectDescription);
+                location.addFurniture(furniture);
+            }
+            if(Objects.equals(objectType, "characters")) {
+                Character character = new Character(objectName, objectDescription);
+                location.addCharacter(character);
+            }
         }
-    }
-
-    public void storeFurniture(Graph wholeDocument, Location location){
-
-    }
-
-    public void storeCharacters(Graph wholeDocument, Location location){
-
     }
 
     public Location getLocationFromName(String locationName){
@@ -81,18 +92,5 @@ public class GameModel {
         }
         return null;
     }
-
-
-    //temporary print method
-    public void printLocations() {
-        for(Location location: locationsList){
-            System.out.println("Location name: " + location.getName());
-            System.out.println("Location description: " + location.getDescription());
-        }
-    }
-
-
-
-
 
 }

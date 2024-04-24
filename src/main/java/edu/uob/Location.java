@@ -38,4 +38,22 @@ public class Location extends GameEntity {
         return null;
     }
 
+    public Furniture getFurnitureFromName(String furnitureName){
+        for(Furniture furniture : furnitureList){
+            if(Objects.equals(furniture.getName(), furnitureName)){
+                return furniture;
+            }
+        }
+        return null;
+    }
+
+    public Character getCharacterFromName(String characterName){
+        for(Character character : characterList){
+            if(Objects.equals(character.getName(), characterName)){
+                return character;
+            }
+        }
+        return null;
+    }
+
 }
