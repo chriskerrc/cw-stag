@@ -1,6 +1,7 @@
 package edu.uob;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Location extends GameEntity {
 
@@ -27,5 +28,14 @@ public class Location extends GameEntity {
     }
 
     //add methods to remove artefacts
+
+    public Artefact getArtefactFromName(String artefactName){
+        for(Artefact artefact : artefactList){
+            if(Objects.equals(artefact.getName(), artefactName)){
+                return artefact;
+            }
+        }
+        return null;
+    }
 
 }

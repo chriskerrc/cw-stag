@@ -36,32 +36,33 @@ public class GameModel {
             locationName = locationDetails.getId().getId();
             locationDescription = locationDetails.getAttribute("description");
             Location location = new Location(locationName, locationDescription);
+            //add artefacts, characters, furniture
+            findArtefacts(graphLocation, location);
             locationsList.add(location);
         }
     }
 
-    public void storeArtefacts(Graph wholeDocument, Location location){
-        //duplicated code
-        ArrayList<Graph> graphSections = wholeDocument.getSubgraphs();
-        //go to first location (update this so it goes to the given location instead)
-        //get name of location
-        ArrayList<Graph> graphLocations = graphSections.get(0).getSubgraphs();
-        Graph firstLocation = graphLocations.get(0);
-        ArrayList<Graph> subGraphs = firstLocation.getSubgraphs();
-        ArrayList<Node> artefactNodes = new ArrayList<>();
+    //improve names of these methods
+    public void findArtefacts(Graph graphLocation, Location location){
+        ArrayList<Graph> subGraphs = graphLocation.getSubgraphs();
+        ArrayList<Node> artefactNodes;
         for(Graph graph : subGraphs){
             if(Objects.equals(graph.getId().getId(), "artefacts")){
                 artefactNodes = graph.getNodes(true);
+                storeArtefacts(artefactNodes, location);
             }
         }
-        String firstNodeName = artefactNodes.get(0).getId().getId();
-        String secondNodeName = artefactNodes.get(1).getId().getId();
-        String firstNodeDescription = artefactNodes.get(0).getAttribute("description");
-        System.out.println("First artefact name: " + firstNodeName);
-        System.out.println("First artefact description: " + firstNodeDescription);
-        System.out.println("Second artefact name: " + secondNodeName);
-        System.out.println("Artefact nodes: " + artefactNodes);
+    }
 
+    public void storeArtefacts(ArrayList<Node> artefactNodes, Location location){
+        String artefactName;
+        String artefactDescription;
+        for (Node artefactNode : artefactNodes) {
+            artefactName = artefactNode.getId().getId();
+            artefactDescription = artefactNode.getAttribute("description");
+            Artefact artefact = new Artefact(artefactName, artefactDescription);
+            location.addArtefact(artefact);
+        }
     }
 
     public void storeFurniture(Graph wholeDocument, Location location){
@@ -71,6 +72,16 @@ public class GameModel {
     public void storeCharacters(Graph wholeDocument, Location location){
 
     }
+
+    public Location getLocationFromName(String locationName){
+        for(Location location : locationsList){
+            if(Objects.equals(location.getName(), locationName)){
+                return location;
+            }
+        }
+        return null;
+    }
+
 
     //temporary print method
     public void printLocations() {
