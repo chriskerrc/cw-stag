@@ -56,6 +56,17 @@ public class Location extends GameEntity {
         return null;
     }
 
+    public ArrayList<Artefact> getArtefactList(){
+        return artefactList;
+    }
+
+    public ArrayList<Furniture> getFurnitureList(){
+        return furnitureList;
+    }
+
+    public ArrayList<Character> getCharacterList(){
+        return characterList;
+    }
     public boolean isFurnitureListEmpty(){
         return furnitureList.isEmpty();
     }

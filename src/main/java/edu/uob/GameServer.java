@@ -1,16 +1,17 @@
 package edu.uob;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import com.alexmerz.graphviz.ParseException;
+import com.alexmerz.graphviz.objects.Graph;
+
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 public final class GameServer {
+
+    GameModel gameModel;
 
     private static final char END_OF_TRANSMISSION = 4;
 
@@ -29,7 +30,8 @@ public final class GameServer {
     * @param actionsFile The game configuration file containing all game actions to use in your game
     */
     public GameServer(File entitiesFile, File actionsFile) {
-        // TODO implement your server logic here
+        this.gameModel = new GameModel();
+        gameModel.loadEntitiesFile(entitiesFile);
     }
 
     /**
@@ -39,8 +41,16 @@ public final class GameServer {
     * @param command The incoming command to be processed
     */
     public String handleCommand(String command) {
-        // TODO implement your server logic here
-        return "";
+        Tokenizer tokenizer = new Tokenizer(command);
+        ArrayList<String> commandTokens = tokenizer.tokenizeCommand();
+        try {
+            Graph wholeDocument = gameModel.parseEntities();
+            gameModel.storeLocations(wholeDocument);
+        } catch (FileNotFoundException | ParseException exception) {
+            return "File not found or parse exception";
+        }
+        STAGCommand stagCommand = new STAGCommand(commandTokens, gameModel);
+        return stagCommand.interpretSTAGCommand();
     }
 
     /**

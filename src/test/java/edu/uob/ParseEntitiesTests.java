@@ -1,6 +1,9 @@
 package edu.uob;
 
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -16,8 +19,13 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ParseEntitiesTests {
 
     @Test
-    void testParseBasicEntities() throws FileNotFoundException, ParseException {
-        GameModel gameModel = new GameModel();
+    void testParseBasicEntities() throws IOException, ParseException {
+        File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
+        File actionsFile = Paths.get("config" + File.separator + "basic-actions.xml").toAbsolutePath().toFile();
+        GameServer server = new GameServer(entitiesFile, actionsFile);
+        //server.blockingListenOn(8888);
+        GameModel gameModel = server.gameModel;
+
         Graph wholeDocument = gameModel.parseEntities();
         gameModel.storeLocations(wholeDocument);
 

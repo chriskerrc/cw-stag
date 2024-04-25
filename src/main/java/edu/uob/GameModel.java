@@ -15,12 +15,20 @@ import com.alexmerz.graphviz.objects.Node;
 
 public class GameModel {
 
-    ArrayList<Location> locationsList = new ArrayList<>();
-    HashMap<Location, Location> pathsMap = new HashMap<>();
+    private ArrayList<Location> locationsList = new ArrayList<>();
+    private HashMap<Location, Location> pathsMap = new HashMap<>();
+
+    private File entitiesFile;
+
+    private Location currentLocation;
+
+    public void loadEntitiesFile(File inputEntitiesFile){
+        entitiesFile = inputEntitiesFile;
+    }
 
     public Graph parseEntities() throws FileNotFoundException, ParseException {
         Parser parser = new Parser();
-        FileReader reader = new FileReader("config" + File.separator + "basic-entities.dot");
+        FileReader reader = new FileReader(entitiesFile);
         parser.parse(reader);
         return parser.getGraphs().get(0);
     }
@@ -42,6 +50,8 @@ public class GameModel {
             processLocationObjects(graphLocation, location);
             locationsList.add(location);
         }
+        //set first location read in as current location
+        currentLocation = locationsList.get(0);
         storePaths(graphSections);
     }
 
@@ -112,6 +122,12 @@ public class GameModel {
         }
         return null;
     }
+
+    public Location getCurrentLocation(){
+        return currentLocation;
+    }
+
+    //need to update currentLocation when move
 
     public Location getDestinationsFromLocation(Location startLocation){
         return pathsMap.get(startLocation);
