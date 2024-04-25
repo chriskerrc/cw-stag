@@ -29,6 +29,7 @@ final class EntitiesFileTests {
           // The locations will always be in the first subgraph
           ArrayList<Graph> locations = sections.get(0).getSubgraphs();
           Graph firstLocation = locations.get(0);
+          //System.out.println("First location: " + firstLocation);
           Node locationDetails = firstLocation.getNodes(false).get(0);
           // Yes, you do need to get the ID twice !
           String locationName = locationDetails.getId().getId();
