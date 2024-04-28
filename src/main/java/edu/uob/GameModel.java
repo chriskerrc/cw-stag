@@ -18,9 +18,11 @@ public class GameModel {
     private ArrayList<Location> locationsList = new ArrayList<>();
     private HashMap<Location, Location> pathsMap = new HashMap<>();
 
+    private ArrayList<Player> playerList = new ArrayList<>();
+
     private File entitiesFile;
 
-    private Location currentLocation;
+    private Location startLocation;
 
     public void loadEntitiesFile(File inputEntitiesFile){
         entitiesFile = inputEntitiesFile;
@@ -50,8 +52,7 @@ public class GameModel {
             processLocationObjects(graphLocation, location);
             locationsList.add(location);
         }
-        //set first location read in as current location
-        currentLocation = locationsList.get(0);
+        startLocation = locationsList.get(0);
         storePaths(graphSections);
     }
 
@@ -123,13 +124,34 @@ public class GameModel {
         return null;
     }
 
-    public Location getCurrentLocation(){
-        return currentLocation;
+    public void createPlayerFromName (String playerName){
+        Player newPlayer = new Player(this, playerName);
+        playerList.add(newPlayer);
     }
 
-    //need to update currentLocation when move
+    public Player getPlayerFromName(String playerName){
+        for(Player player : playerList){
+            if(Objects.equals(player.getName(), playerName)){
+                return player;
+            }
+        }
+        return null;
+    }
 
-    public Location getDestinationsFromLocation(Location startLocation){
+    public void updatePlayerLocation(String playerName, Location newLocation){
+        for(Player player : playerList){
+            if(Objects.equals(player.getName(), playerName)){
+                player.setCurrentLocation(newLocation);
+                System.out.println("This is the the player we're updating location on: " + player);
+            }
+        }
+    }
+
+    public Location getStartLocation(){
+        return startLocation;
+    }
+
+    public Location getDestinationFromLocation(Location startLocation){
         return pathsMap.get(startLocation);
     }
 

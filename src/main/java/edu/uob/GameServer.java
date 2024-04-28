@@ -43,6 +43,7 @@ public final class GameServer {
     public String handleCommand(String command) {
         Tokenizer tokenizer = new Tokenizer(command);
         ArrayList<String> commandTokens = tokenizer.tokenizeCommand();
+        //it doesn't make sense to parse the file for every command, just the first one. but when I tried to change this, it broke...
         try {
             Graph wholeDocument = gameModel.parseEntities();
             gameModel.storeLocations(wholeDocument);
@@ -94,5 +95,9 @@ public final class GameServer {
                 writer.flush();
             }
         }
+    }
+
+    private void initialiseGameModel(){
+
     }
 }
