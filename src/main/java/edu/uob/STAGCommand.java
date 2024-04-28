@@ -1,11 +1,17 @@
 package edu.uob;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class STAGCommand {
 
-    ArrayList<String> commandTokens;
-    GameModel gameModel;
+    private ArrayList<String> commandTokens;
+    private GameModel gameModel;
+    private String currentPlayerName;
+
+    private Player currentPlayerObject;
+
+    private String matchingDestinationName;
 
     public STAGCommand(ArrayList<String> commandTokens, GameModel gameModel) {
         this.commandTokens = commandTokens;
@@ -13,21 +19,44 @@ public class STAGCommand {
     }
 
     public String interpretSTAGCommand(){
-        String response = "";
-        if(commandTokens.contains("look")){ //currently only matches exact case of "look"
-            response = interpretLookCommand();
+        String response = "Command not recognised";
+        getPlayerNameFromCommand();
+        Player potentialPlayer = gameModel.getPlayerFromName(currentPlayerName);
+        if(potentialPlayer != null){
+            currentPlayerObject = potentialPlayer;
         }
         else{
-            response = "command not recognised";
+            gameModel.createPlayerFromName(currentPlayerName);
+            currentPlayerObject = gameModel.getPlayerFromName(currentPlayerName);
+        }
+        for(String token : commandTokens){
+            if(token.toLowerCase().contains("look")){
+                response = interpretLookCommand();
+            }
+            if(token.toLowerCase().contains("goto")){
+                response = interpretGotoCommand();
+            }
         }
         return response;
+    }
+
+    private void getPlayerNameFromCommand(){
+        String playerName = commandTokens.get(0);
+        if(playerName.contains(":")) {
+            playerName = playerName.replaceAll(":$", ""); //remove colon
+            playerName = playerName.toLowerCase(); // "Simon" is the same as "simon"
+        }
+        else{
+            playerName = null;
+        }
+        currentPlayerName = playerName;
     }
 
     //try to implement subclasses that extend this class e.g. Look
 
     //this method is too long
     private String interpretLookCommand(){
-        Location currentLocation = gameModel.getCurrentLocation();
+        Location currentLocation = currentPlayerObject.getCurrentLocation();
         String currentLocationDescription = currentLocation.getDescription();
         String locationResponse = "You are in " + currentLocationDescription + ". You can see:\n"; //does newline char work on all OSes?
         //Important: some of this code won't be specific to look command - generalise it out
@@ -54,15 +83,40 @@ public class STAGCommand {
         }
         String characterResponse = characterResponseBuilder.toString();
         //Paths
-        Location destinationLocation = gameModel.getDestinationsFromLocation(currentLocation);
+        Location destinationLocation = gameModel.getDestinationFromLocation(currentLocation);
         String destinationString = destinationLocation.getName();
         String pathsResponse = "You can access from here: \n" + destinationString + "\n";
         return locationResponse + artefactResponse + furnitureResponse + characterResponse + pathsResponse;
     }
 
-    //method: check if tokens list contains "look"
+    private String interpretGotoCommand(){
+        Location currentLocation = currentPlayerObject.getCurrentLocation();
+        if(!commandIncludesDestinationThatExists()){
+            return "Did you provide a location to goto?";
+        }
+        Location potentialDestination = gameModel.getDestinationFromLocation(currentLocation);
+        if(Objects.equals(potentialDestination.getName(), matchingDestinationName)){
+            gameModel.updatePlayerLocation(currentPlayerName, potentialDestination);
+            //not sure if i need to automatically do look command: example video seems to suggest so, but ExampleSTAGTests do look command after goto
+            //return interpretLookCommand();
+            return "You went to the " + potentialDestination.getName();
+        }
+        else{
+            return "You can't get there from here";
+        }
+    }
 
-
-
+    //this method assumes that there is only one destination in command -  to do: guard against there being two
+    private boolean commandIncludesDestinationThatExists(){
+        for(String token: commandTokens){
+            Location location = gameModel.getLocationFromName(token);
+            if(location != null && Objects.equals(gameModel.getLocationFromName(token).getName(), token)){
+                matchingDestinationName = gameModel.getLocationFromName(token).getName();
+                System.out.println("Matching destination name: " + matchingDestinationName);
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

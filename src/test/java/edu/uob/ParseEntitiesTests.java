@@ -91,11 +91,11 @@ public class ParseEntitiesTests {
         assertTrue(storeroom.isFurnitureListEmpty());
 
         //paths
-        Location cabinDestination = gameModel.getDestinationsFromLocation(cabin);
+        Location cabinDestination = gameModel.getDestinationFromLocation(cabin);
         assertEquals("forest", cabinDestination.getName());
-        Location forestDestination = gameModel.getDestinationsFromLocation(forest);
+        Location forestDestination = gameModel.getDestinationFromLocation(forest);
         assertEquals("cabin", forestDestination.getName());
-        Location cellarDestination = gameModel.getDestinationsFromLocation(cellar);
+        Location cellarDestination = gameModel.getDestinationFromLocation(cellar);
         assertEquals("cabin", cellarDestination.getName());
     }
 
