@@ -44,6 +44,12 @@ public class STAGCommand {
             if(token.toLowerCase().contains("inv")){
                 response = interpretInvCommand();
             }
+            if(token.toLowerCase().contains("inventory")){ //alternative to "inv"
+                response = interpretInvCommand();
+            }
+            if(token.toLowerCase().contains("drop")){
+                response = interpretDropCommand();
+            }
         }
         return response;
     }
@@ -120,14 +126,25 @@ public class STAGCommand {
         if(!commandIncludesArtefactInRoom(currentLocation)){
             return "That artefact isn't in this location";
         }
-        //artefact is in the location, so
         Artefact pickedUpArtefact = currentLocation.removeArtefact(matchingArtefactName);
         currentPlayerObject.addArtefactToInventory(pickedUpArtefact);
         return "You picked up " + matchingArtefactName;
     }
 
+    private String interpretDropCommand(){
+        ArrayList<Artefact> inventoryList = currentPlayerObject.getInventoryList();
+        Artefact possibleArtefact = getArtefactFromInventory(inventoryList);
+        if(possibleArtefact == null){
+            return "You don't have that artefact or it doesn't exist";
+        }
+        currentPlayerObject.dropArtefactFromInventory(possibleArtefact);
+        Location currentLocation = currentPlayerObject.getCurrentLocation();
+        currentLocation.addArtefact(possibleArtefact);
+        return "You dropped " + matchingArtefactName;
+    }
+
     private String interpretInvCommand(){
-        String inventoryResponse = "You are carrying";
+        String inventoryResponse = "You are carrying: \n";
         StringBuilder inventoryResponseBuilder = new StringBuilder();
         ArrayList<Artefact> inventoryList = currentPlayerObject.getInventoryList();
         for (Artefact artefact : inventoryList) {
@@ -161,6 +178,24 @@ public class STAGCommand {
             }
         }
         return false;
+    }
+
+    //refactor this to use stream
+    private Artefact getArtefactFromInventory(ArrayList<Artefact> inventoryList){
+        if(inventoryList.isEmpty()){
+            return null;
+        }
+        //too deeply nested
+        for(String token: commandTokens){
+            for(Artefact artefact : inventoryList){
+                if(Objects.equals(artefact.getName(), token)){
+                    matchingArtefactName = artefact.getName();
+                    return artefact;
+                }
+            }
+
+        }
+        return null;
     }
 
 }
