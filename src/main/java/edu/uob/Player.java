@@ -1,5 +1,7 @@
 package edu.uob;
 
+import java.util.ArrayList;
+
 public class Player {
 
     private Location currentLocation;
@@ -7,6 +9,8 @@ public class Player {
     private GameModel gameModel;
 
     private String name;
+
+    private ArrayList<Artefact> inventoryList = new ArrayList<>();
 
 
     public Player(GameModel gameModel, String name){
@@ -26,6 +30,19 @@ public class Player {
 
     public void setCurrentLocation(Location newLocation){
         this.currentLocation = newLocation;
+    }
+
+    public void addArtefactToInventory(Artefact pickedUpArtefact){
+        inventoryList.add(pickedUpArtefact);
+    }
+
+    public Artefact dropArtefactFromInventory(Artefact artefactToDrop){
+        inventoryList.remove(artefactToDrop);
+        return artefactToDrop;
+    }
+
+    public ArrayList<Artefact> getInventoryList(){
+        return inventoryList;
     }
 
 

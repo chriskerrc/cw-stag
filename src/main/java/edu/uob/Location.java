@@ -79,4 +79,15 @@ public class Location extends GameEntity {
         return artefactList.isEmpty();
     }
 
+    //think about matching by case e.g. "key and "kEY"
+    public Artefact removeArtefact(String artefactName){
+        for(Artefact artefact : artefactList){
+            if(Objects.equals(artefact.getName(), artefactName)){
+                artefactList.remove(artefact);
+                return artefact;
+            }
+        }
+        return null;
+    }
+
 }

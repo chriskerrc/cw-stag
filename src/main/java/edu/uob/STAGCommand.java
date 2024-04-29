@@ -13,6 +13,8 @@ public class STAGCommand {
 
     private String matchingDestinationName;
 
+    private String matchingArtefactName;
+
     public STAGCommand(ArrayList<String> commandTokens, GameModel gameModel) {
         this.commandTokens = commandTokens;
         this.gameModel = gameModel;
@@ -35,6 +37,18 @@ public class STAGCommand {
             }
             if(token.toLowerCase().contains("goto")){
                 response = interpretGotoCommand();
+            }
+            if(token.toLowerCase().contains("get")){
+                response = interpretGetCommand();
+            }
+            if(token.toLowerCase().contains("inv")){
+                response = interpretInvCommand();
+            }
+            if(token.toLowerCase().contains("inventory")){ //alternative to "inv"
+                response = interpretInvCommand();
+            }
+            if(token.toLowerCase().contains("drop")){
+                response = interpretDropCommand();
             }
         }
         return response;
@@ -90,7 +104,7 @@ public class STAGCommand {
     }
 
     private String interpretGotoCommand(){
-        Location currentLocation = currentPlayerObject.getCurrentLocation();
+        Location currentLocation = currentPlayerObject.getCurrentLocation(); //generalise this rather than copy pasting across methods
         if(!commandIncludesDestinationThatExists()){
             return "Did you provide a location to goto?";
         }
@@ -106,17 +120,82 @@ public class STAGCommand {
         }
     }
 
+    //assumes only one artefact in command for now
+    private String interpretGetCommand(){
+        Location currentLocation = currentPlayerObject.getCurrentLocation();
+        if(!commandIncludesArtefactInRoom(currentLocation)){
+            return "That artefact isn't in this location";
+        }
+        Artefact pickedUpArtefact = currentLocation.removeArtefact(matchingArtefactName);
+        currentPlayerObject.addArtefactToInventory(pickedUpArtefact);
+        return "You picked up " + matchingArtefactName;
+    }
+
+    private String interpretDropCommand(){
+        ArrayList<Artefact> inventoryList = currentPlayerObject.getInventoryList();
+        Artefact possibleArtefact = getArtefactFromInventory(inventoryList);
+        if(possibleArtefact == null){
+            return "You don't have that artefact or it doesn't exist";
+        }
+        currentPlayerObject.dropArtefactFromInventory(possibleArtefact);
+        Location currentLocation = currentPlayerObject.getCurrentLocation();
+        currentLocation.addArtefact(possibleArtefact);
+        return "You dropped " + matchingArtefactName;
+    }
+
+    private String interpretInvCommand(){
+        String inventoryResponse = "You are carrying: \n";
+        StringBuilder inventoryResponseBuilder = new StringBuilder();
+        ArrayList<Artefact> inventoryList = currentPlayerObject.getInventoryList();
+        for (Artefact artefact : inventoryList) {
+            inventoryResponseBuilder.append(artefact.getDescription()).append("\n");
+        }
+        String artefactsInInventory = inventoryResponseBuilder.toString();
+        return inventoryResponse + artefactsInInventory;
+    }
+
     //this method assumes that there is only one destination in command -  to do: guard against there being two
     private boolean commandIncludesDestinationThatExists(){
         for(String token: commandTokens){
             Location location = gameModel.getLocationFromName(token);
             if(location != null && Objects.equals(gameModel.getLocationFromName(token).getName(), token)){
                 matchingDestinationName = gameModel.getLocationFromName(token).getName();
-                System.out.println("Matching destination name: " + matchingDestinationName);
                 return true;
             }
         }
         return false;
+    }
+
+    private boolean commandIncludesArtefactInRoom(Location currentLocation){
+        if(currentLocation.isArtefactListEmpty()){
+            return false;
+        }
+        for(String token: commandTokens){
+            Artefact artefact = currentLocation.getArtefactFromName(token);
+            if(artefact != null && Objects.equals(currentLocation.getArtefactFromName(token).getName(), token)){
+                matchingArtefactName = currentLocation.getArtefactFromName(token).getName();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //refactor this to use stream
+    private Artefact getArtefactFromInventory(ArrayList<Artefact> inventoryList){
+        if(inventoryList.isEmpty()){
+            return null;
+        }
+        //too deeply nested
+        for(String token: commandTokens){
+            for(Artefact artefact : inventoryList){
+                if(Objects.equals(artefact.getName(), token)){
+                    matchingArtefactName = artefact.getName();
+                    return artefact;
+                }
+            }
+
+        }
+        return null;
     }
 
 }
