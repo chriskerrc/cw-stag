@@ -13,6 +13,8 @@ public class STAGCommand {
 
     private String matchingDestinationName;
 
+    private String matchingArtefactName;
+
     public STAGCommand(ArrayList<String> commandTokens, GameModel gameModel) {
         this.commandTokens = commandTokens;
         this.gameModel = gameModel;
@@ -35,6 +37,9 @@ public class STAGCommand {
             }
             if(token.toLowerCase().contains("goto")){
                 response = interpretGotoCommand();
+            }
+            if(token.toLowerCase().contains("get")){
+                response = interpretGetCommand();
             }
         }
         return response;
@@ -90,7 +95,7 @@ public class STAGCommand {
     }
 
     private String interpretGotoCommand(){
-        Location currentLocation = currentPlayerObject.getCurrentLocation();
+        Location currentLocation = currentPlayerObject.getCurrentLocation(); //generalise this rather than copy pasting across methods
         if(!commandIncludesDestinationThatExists()){
             return "Did you provide a location to goto?";
         }
@@ -106,13 +111,39 @@ public class STAGCommand {
         }
     }
 
+    //assumes only one artefact in command for now
+    private String interpretGetCommand(){
+        Location currentLocation = currentPlayerObject.getCurrentLocation();
+        if(!commandIncludesArtefactInRoom(currentLocation)){
+            return "That artefact isn't in this location";
+        }
+        //artefact is in the location, so
+        Artefact pickedUpArtefact = currentLocation.removeArtefact(matchingArtefactName);
+        currentPlayerObject.addArtefactToInventory(pickedUpArtefact);
+        return "Picked up " + matchingArtefactName;
+
+    }
+
     //this method assumes that there is only one destination in command -  to do: guard against there being two
     private boolean commandIncludesDestinationThatExists(){
         for(String token: commandTokens){
             Location location = gameModel.getLocationFromName(token);
             if(location != null && Objects.equals(gameModel.getLocationFromName(token).getName(), token)){
                 matchingDestinationName = gameModel.getLocationFromName(token).getName();
-                System.out.println("Matching destination name: " + matchingDestinationName);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean commandIncludesArtefactInRoom(Location currentLocation){
+        if(currentLocation.isArtefactListEmpty()){
+            return false;
+        }
+        for(String token: commandTokens){
+            Artefact artefact = currentLocation.getArtefactFromName(token);
+            if(artefact != null && Objects.equals(currentLocation.getArtefactFromName(token).getName(), token)){
+                matchingArtefactName = currentLocation.getArtefactFromName(token).getName();
                 return true;
             }
         }
