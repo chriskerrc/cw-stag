@@ -41,6 +41,9 @@ public class STAGCommand {
             if(token.toLowerCase().contains("get")){
                 response = interpretGetCommand();
             }
+            if(token.toLowerCase().contains("inv")){
+                response = interpretInvCommand();
+            }
         }
         return response;
     }
@@ -120,8 +123,18 @@ public class STAGCommand {
         //artefact is in the location, so
         Artefact pickedUpArtefact = currentLocation.removeArtefact(matchingArtefactName);
         currentPlayerObject.addArtefactToInventory(pickedUpArtefact);
-        return "Picked up " + matchingArtefactName;
+        return "You picked up " + matchingArtefactName;
+    }
 
+    private String interpretInvCommand(){
+        String inventoryResponse = "You are carrying";
+        StringBuilder inventoryResponseBuilder = new StringBuilder();
+        ArrayList<Artefact> inventoryList = currentPlayerObject.getInventoryList();
+        for (Artefact artefact : inventoryList) {
+            inventoryResponseBuilder.append(artefact.getDescription()).append("\n");
+        }
+        String artefactsInInventory = inventoryResponseBuilder.toString();
+        return inventoryResponse + artefactsInInventory;
     }
 
     //this method assumes that there is only one destination in command -  to do: guard against there being two

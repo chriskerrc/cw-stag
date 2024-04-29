@@ -36,5 +36,9 @@ public class Player {
         inventoryList.add(pickedUpArtefact);
     }
 
+    public ArrayList<Artefact> getInventoryList(){
+        return inventoryList;
+    }
+
 
 }
