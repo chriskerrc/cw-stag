@@ -15,12 +15,16 @@ public class GameAction
         subjectEntities.add(subjectEntity);
     }
 
-    public void addConsumedEntity(GameEntity consumedEntity){
+    public void addConsumableEntity(GameEntity consumedEntity){
         consumedEntities.add(consumedEntity);
     }
 
-    public void addProducedEntity(GameEntity producedEntity){
+    public void addProductEntity(GameEntity producedEntity){
         producedEntities.add(producedEntity);
+    }
+
+    public void setNarration(String inputNarration){
+        narration = inputNarration;
     }
 
 
