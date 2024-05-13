@@ -3,15 +3,25 @@ package edu.uob;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Objects;
-
+//To handle entities
 import com.alexmerz.graphviz.ParseException;
 import com.alexmerz.graphviz.Parser;
 import com.alexmerz.graphviz.objects.Edge;
 import com.alexmerz.graphviz.objects.Graph;
 import com.alexmerz.graphviz.objects.Node;
+//To handle actions
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import org.xml.sax.SAXException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public class GameModel {
 
@@ -21,12 +31,14 @@ public class GameModel {
     private ArrayList<Player> playerList = new ArrayList<>();
 
     private File entitiesFile;
+    private File actionsFile;
 
     private Location startLocation;
 
     public void loadEntitiesFile(File inputEntitiesFile){
         entitiesFile = inputEntitiesFile;
     }
+    public void loadActionsFile(File inputActionsFile) { actionsFile = inputActionsFile; }
 
     public Graph parseEntities() throws FileNotFoundException, ParseException {
         Parser parser = new Parser();
@@ -35,6 +47,12 @@ public class GameModel {
         return parser.getGraphs().get(0);
     }
 
+    public Document parseActions() throws IOException, ParserConfigurationException, SAXException {
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        return builder.parse(actionsFile);
+    }
+
+    //HANDLE ENTITIES
     public void storeLocations(Graph wholeDocument) {
         ArrayList<Graph> graphSections = wholeDocument.getSubgraphs();
         ArrayList<Graph> graphLocations = graphSections.get(0).getSubgraphs();
@@ -55,7 +73,6 @@ public class GameModel {
         startLocation = locationsList.get(0);
         storePaths(graphSections);
     }
-
 
     //maybe simplify this method
     private void processLocationObjects(Graph graphLocation, Location location){
@@ -153,6 +170,13 @@ public class GameModel {
 
     public Location getDestinationFromLocation(Location startLocation){
         return pathsMap.get(startLocation);
+    }
+
+    //HANDLE ACTIONS
+
+    public void storeActions(Document document) {
+        HashMap<String,HashSet<GameAction>> actions = new HashMap<String, HashSet<GameAction>>();
+
     }
 
 }

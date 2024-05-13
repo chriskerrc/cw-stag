@@ -32,6 +32,7 @@ public final class GameServer {
     public GameServer(File entitiesFile, File actionsFile) {
         this.gameModel = new GameModel();
         gameModel.loadEntitiesFile(entitiesFile);
+        gameModel.loadActionsFile(actionsFile);
     }
 
     /**
