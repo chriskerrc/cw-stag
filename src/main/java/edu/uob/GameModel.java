@@ -3,15 +3,25 @@ package edu.uob;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Objects;
-
+//To handle entities
 import com.alexmerz.graphviz.ParseException;
 import com.alexmerz.graphviz.Parser;
 import com.alexmerz.graphviz.objects.Edge;
 import com.alexmerz.graphviz.objects.Graph;
 import com.alexmerz.graphviz.objects.Node;
+//To handle actions
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import org.xml.sax.SAXException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public class GameModel {
 
@@ -20,13 +30,17 @@ public class GameModel {
 
     private ArrayList<Player> playerList = new ArrayList<>();
 
+    private HashMap<String,HashSet<GameAction>> actionsList = new HashMap<String, HashSet<GameAction>>();
+
     private File entitiesFile;
+    private File actionsFile;
 
     private Location startLocation;
 
     public void loadEntitiesFile(File inputEntitiesFile){
         entitiesFile = inputEntitiesFile;
     }
+    public void loadActionsFile(File inputActionsFile) { actionsFile = inputActionsFile; }
 
     public Graph parseEntities() throws FileNotFoundException, ParseException {
         Parser parser = new Parser();
@@ -35,6 +49,12 @@ public class GameModel {
         return parser.getGraphs().get(0);
     }
 
+    public Document parseActions() throws IOException, ParserConfigurationException, SAXException {
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        return builder.parse(actionsFile);
+    }
+
+    //HANDLE ENTITIES
     public void storeLocations(Graph wholeDocument) {
         ArrayList<Graph> graphSections = wholeDocument.getSubgraphs();
         ArrayList<Graph> graphLocations = graphSections.get(0).getSubgraphs();
@@ -55,7 +75,6 @@ public class GameModel {
         startLocation = locationsList.get(0);
         storePaths(graphSections);
     }
-
 
     //maybe simplify this method
     private void processLocationObjects(Graph graphLocation, Location location){
@@ -153,6 +172,68 @@ public class GameModel {
 
     public Location getDestinationFromLocation(Location startLocation){
         return pathsMap.get(startLocation);
+    }
+
+    //HANDLE ACTIONS
+
+    //break up this giant method
+    public void storeActions(Document document) {
+        //get the first action
+        Element root = document.getDocumentElement();
+        NodeList actions = root.getChildNodes();
+        Element firstAction = (Element)actions.item(1); //later, generalise this to action n
+        //get keyphrase from action
+        Element triggers = (Element)firstAction.getElementsByTagName("triggers").item(0);
+        String firstTriggerPhrase = triggers.getElementsByTagName("keyphrase").item(0).getTextContent(); //later, generalise to keyphrase n
+        GameAction gameAction = new GameAction();
+        Element subjects = (Element)firstAction.getElementsByTagName("subjects").item(0);
+        NodeList subjectsNodeList = subjects.getElementsByTagName("entity");
+        for(int i = 0; i < subjectsNodeList.getLength(); i++){
+            String subjectName = subjectsNodeList.item(i).getTextContent();
+            Subject subject = new Subject(subjectName, null);
+            gameAction.addSubjectEntity(subject);
+        }
+        Element products = (Element)firstAction.getElementsByTagName("produced").item(0);
+        NodeList productsNodeList = products.getElementsByTagName("entity");
+        if(productsNodeList.getLength() > 0){
+            for(int i = 0; i < productsNodeList.getLength(); i++){
+                String productName = productsNodeList.item(i).getTextContent();
+                Product product = new Product(productName, null);
+                gameAction.addProductEntity(product);
+            }
+        }
+        Element consumables = (Element)firstAction.getElementsByTagName("consumed").item(0);
+        NodeList consumablesNodeList = consumables.getElementsByTagName("entity");
+        if(consumablesNodeList.getLength() > 0){
+            for(int i = 0; i < consumablesNodeList.getLength(); i++){
+                String consumableName = consumablesNodeList.item(i).getTextContent();
+                Consumable consumable = new Consumable(consumableName, null);
+                gameAction.addConsumableEntity(consumable);
+            }
+        }
+        Element narration = (Element)firstAction.getElementsByTagName("narration").item(0);
+        gameAction.setNarration(narration.getTextContent());
+        //add keyphrase and gameAction to hash map
+        addActionToList(firstTriggerPhrase, gameAction);
+
+        //move on to the next keyphrase in the first action
+           //as above
+
+        //move on to other actions, and populate these (odd numbers)
+
+
+    }
+
+    private void addActionToList(String keyphrase, GameAction gameAction){
+        HashSet<GameAction> gameActionsHashSet;
+        if(actionsList.containsKey(keyphrase)){
+            gameActionsHashSet = actionsList.get(keyphrase);
+        }
+        else{
+            gameActionsHashSet = new HashSet<>();
+        }
+        gameActionsHashSet.add(gameAction);
+        actionsList.put(keyphrase, gameActionsHashSet);
     }
 
 }

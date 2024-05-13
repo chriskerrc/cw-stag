@@ -8,6 +8,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import org.xml.sax.SAXException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public final class GameServer {
 
@@ -32,6 +39,7 @@ public final class GameServer {
     public GameServer(File entitiesFile, File actionsFile) {
         this.gameModel = new GameModel();
         gameModel.loadEntitiesFile(entitiesFile);
+        gameModel.loadActionsFile(actionsFile);
     }
 
     /**
@@ -47,8 +55,12 @@ public final class GameServer {
         try {
             Graph wholeDocument = gameModel.parseEntities();
             gameModel.storeLocations(wholeDocument);
+            Document actionsDocument = gameModel.parseActions();
+            gameModel.storeActions(actionsDocument);
         } catch (FileNotFoundException | ParseException exception) {
             return "File not found or parse exception";
+        } catch (IOException | ParserConfigurationException | SAXException e) {
+            throw new RuntimeException(e);
         }
         STAGCommand stagCommand = new STAGCommand(commandTokens, gameModel);
         return stagCommand.interpretSTAGCommand();
