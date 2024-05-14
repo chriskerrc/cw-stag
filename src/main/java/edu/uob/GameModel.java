@@ -176,24 +176,29 @@ public class GameModel {
 
     //HANDLE ACTIONS
 
-    //break up this giant method
-    public void storeActions(Document document) {
-        //get the first action
+    public void storeActions(Document document){
         Element root = document.getDocumentElement();
         NodeList actions = root.getChildNodes();
-        Element firstAction = (Element)actions.item(1); //later, generalise this to action n
-        //get keyphrase from action
-        Element triggers = (Element)firstAction.getElementsByTagName("triggers").item(0);
-        String firstTriggerPhrase = triggers.getElementsByTagName("keyphrase").item(0).getTextContent(); //later, generalise to keyphrase n
+        for(int i = 0; i < actions.getLength(); i++) {
+            //only the odd elements are actually actions
+            if(i % 2 != 0) {
+                Element action = (Element) actions.item(i);
+                processAction(action);
+            }
+        }
+    }
+
+    //break up this giant method
+    private void processAction(Element actionElement) {
         GameAction gameAction = new GameAction();
-        Element subjects = (Element)firstAction.getElementsByTagName("subjects").item(0);
+        Element subjects = (Element)actionElement.getElementsByTagName("subjects").item(0);
         NodeList subjectsNodeList = subjects.getElementsByTagName("entity");
         for(int i = 0; i < subjectsNodeList.getLength(); i++){
             String subjectName = subjectsNodeList.item(i).getTextContent();
             Subject subject = new Subject(subjectName, null);
             gameAction.addSubjectEntity(subject);
         }
-        Element products = (Element)firstAction.getElementsByTagName("produced").item(0);
+        Element products = (Element)actionElement.getElementsByTagName("produced").item(0);
         NodeList productsNodeList = products.getElementsByTagName("entity");
         if(productsNodeList.getLength() > 0){
             for(int i = 0; i < productsNodeList.getLength(); i++){
@@ -202,7 +207,7 @@ public class GameModel {
                 gameAction.addProductEntity(product);
             }
         }
-        Element consumables = (Element)firstAction.getElementsByTagName("consumed").item(0);
+        Element consumables = (Element)actionElement.getElementsByTagName("consumed").item(0);
         NodeList consumablesNodeList = consumables.getElementsByTagName("entity");
         if(consumablesNodeList.getLength() > 0){
             for(int i = 0; i < consumablesNodeList.getLength(); i++){
@@ -211,17 +216,15 @@ public class GameModel {
                 gameAction.addConsumableEntity(consumable);
             }
         }
-        Element narration = (Element)firstAction.getElementsByTagName("narration").item(0);
+        Element narration = (Element)actionElement.getElementsByTagName("narration").item(0);
         gameAction.setNarration(narration.getTextContent());
-        //add keyphrase and gameAction to hash map
-        addActionToList(firstTriggerPhrase, gameAction);
-
-        //move on to the next keyphrase in the first action
-           //as above
-
-        //move on to other actions, and populate these (odd numbers)
-
-
+        //for each keyphrase, add hashset of gameActions
+        Element triggers = (Element)actionElement.getElementsByTagName("triggers").item(0);
+        NodeList triggersNodeList = triggers.getElementsByTagName("keyphrase");
+        for(int i = 0; i < triggersNodeList.getLength(); i++){
+            String triggerPhrase = triggersNodeList.item(i).getTextContent();
+            addActionToList(triggerPhrase, gameAction);
+        }
     }
 
     private void addActionToList(String keyphrase, GameAction gameAction){
@@ -234,6 +237,10 @@ public class GameModel {
         }
         gameActionsHashSet.add(gameAction);
         actionsList.put(keyphrase, gameActionsHashSet);
+    }
+
+    public HashSet<GameAction> getGameActionHashSet (String keyphrase){
+        return actionsList.get(keyphrase);
     }
 
 }

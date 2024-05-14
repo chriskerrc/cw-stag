@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,20 +27,57 @@ public class ParseActionsTest {
         GameModel gameModel = server.gameModel;
         Document actionsDocument = gameModel.parseActions();
         gameModel.storeActions(actionsDocument);
-        //get hashset of gameActions from keyphrase
 
-        //check the first action
-
-        //check the first keyphrase
-
+        //First action
+        //get hashset of gameActions from keyphrase "open"
+        HashSet<GameAction> gameActionHashSetOpen = gameModel.getGameActionHashSet("open");
+        GameAction gameAction = gameActionHashSetOpen.stream().findFirst().orElse(null);
+        assert gameAction != null;
         //check subjects
-
-        //check products
-
+        Subject trapdoorSubject = (Subject) gameAction.getSubjectEntityFromName("trapdoor");
+        assertEquals(trapdoorSubject.getName(), "trapdoor");
+        Subject keySubject = (Subject) gameAction.getSubjectEntityFromName("key");
+        assertEquals(keySubject.getName(), "key");
         //check consumables
-
+        Consumable keyConsumable = (Consumable) gameAction.getConsumedEntityFromName("key");
+        assertEquals(keyConsumable.getName(), "key");
+        //check products
+        Product cellarProduct = (Product)  gameAction.getProducedEntityFromName("cellar");
+        assertEquals(cellarProduct.getName(), "cellar");
         //check narration
+        String firstActionNarration = gameAction.getProducedNarration();
+        assertEquals(firstActionNarration, "You unlock the trapdoor and see steps leading down into a cellar");
+        //check that open and unlock keyphrases are mapped to same hashset of GameActions
+        HashSet<GameAction> gameActionHashSetUnlock = gameModel.getGameActionHashSet("unlock");
+        assertEquals(gameActionHashSetOpen, gameActionHashSetUnlock);
 
+        //Second action
+        //get hashset of gameActions from keyphrase "cut"
+        HashSet<GameAction> gameActionHashSetCut = gameModel.getGameActionHashSet("cut");
+        GameAction gameActionCut = gameActionHashSetCut.stream().findFirst().orElse(null);
+        assert gameActionCut != null;
+        //Check subjects
+        Subject treeSubject = (Subject) gameActionCut.getSubjectEntityFromName("tree");
+        assertEquals(treeSubject.getName(), "tree");
+        Subject axeSubject = (Subject) gameActionCut.getSubjectEntityFromName("axe");
+        assertEquals(axeSubject.getName(), "axe");
 
+        //Third action
+        //get hashset of gameActions from keyphrase "drink"
+        HashSet<GameAction> gameActionHashSetDrink = gameModel.getGameActionHashSet("drink");
+        GameAction gameActionDrink = gameActionHashSetDrink.stream().findFirst().orElse(null);
+        assert gameActionDrink != null;
+        //check consumables
+        Consumable potionConsumable = (Consumable) gameActionDrink.getConsumedEntityFromName("potion");
+        assertEquals(potionConsumable.getName(), "potion");
+
+        //Fourth action
+        //get hashset of gameActions from keyphrase "attack"
+        HashSet<GameAction> gameActionHashSetAttack = gameModel.getGameActionHashSet("attack");
+        GameAction gameActionAttack = gameActionHashSetAttack.stream().findFirst().orElse(null);
+        //check narration
+        assert gameActionAttack != null;
+        String fourthActionNarration = gameActionAttack.getProducedNarration();
+        assertEquals(fourthActionNarration, "You attack the elf, but he fights back and you lose some health");
     }
 }

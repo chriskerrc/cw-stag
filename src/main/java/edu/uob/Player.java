@@ -1,6 +1,7 @@
 package edu.uob;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Player {
 
@@ -43,6 +44,15 @@ public class Player {
 
     public ArrayList<Artefact> getInventoryList(){
         return inventoryList;
+    }
+
+    public boolean subjectIsInInventory(String subjectName){
+        for (Artefact artefact : inventoryList){
+            if(Objects.equals(artefact.getName(), subjectName)){
+                return true;
+            }
+        }
+        return false;
     }
 
 
