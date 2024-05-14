@@ -1,6 +1,7 @@
 package edu.uob;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Objects;
 
 public class STAGCommand {
@@ -50,6 +51,7 @@ public class STAGCommand {
             if(token.toLowerCase().contains("drop")){
                 response = interpretDropCommand();
             }
+            //else check if command contains keyphrase and subject
         }
         return response;
     }
@@ -198,4 +200,42 @@ public class STAGCommand {
         return null;
     }
 
+    private HashSet<GameAction> commandContainsKeyphrase(){
+        for(String token: commandTokens){
+            HashSet<GameAction> gameActionHashSet = gameModel.getGameActionHashSet(token);
+            if(gameActionHashSet != null){
+                return gameActionHashSet;
+            }
+        }
+        return null;
+    }
+
+    //check if hashset contains subject
+    private GameAction subjectInCommandIsInGameAction(HashSet<GameAction> gameActionHashSet){
+        for(GameAction gameAction: gameActionHashSet){
+            for(String token: commandTokens){
+                Subject subject = (Subject) gameAction.getSubjectEntityFromName(token);
+                if(subject != null){
+                    return gameAction;
+                }
+            }
+        }
+        return null;
+    }
+
+    private Boolean allSubjectsAreAvailable(GameAction gameAction){
+        ArrayList<Subject> subjectList = gameAction.getSubjectList();
+        int matchingSubjects = 0;
+        Location currentLocation = currentPlayerObject.getCurrentLocation();
+        for(Subject subject: subjectList){
+            if(currentPlayerObject.subjectIsInInventory(subject.getName())){
+                matchingSubjects++;
+            }
+            if(currentLocation.subjectIsInLocation(subject.getName())){
+                matchingSubjects++;
+            }
+        }
+        return matchingSubjects == subjectList.size();
+    }
 }
+//there could be an action that has no consumption or production - still output narration if triggers and subjects match

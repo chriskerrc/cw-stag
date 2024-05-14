@@ -90,4 +90,25 @@ public class Location extends GameEntity {
         return null;
     }
 
+    //can I do this without duplicating code?
+
+    public boolean subjectIsInLocation(String subjectName){
+        for (Artefact artefact : artefactList){
+            if(Objects.equals(artefact.getName(), subjectName)){
+                return true;
+            }
+        }
+        for (Furniture furniture : furnitureList){
+            if(Objects.equals(furniture.getName(), subjectName)){
+                return true;
+            }
+        }
+        for (Character character : characterList){
+            if(Objects.equals(character.getName(), subjectName)){
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

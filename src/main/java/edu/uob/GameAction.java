@@ -5,22 +5,22 @@ import java.util.Objects;
 
 public class GameAction
 {
-    ArrayList<GameEntity> subjectEntities = new ArrayList<>();
-    ArrayList<GameEntity> consumedEntities = new ArrayList<>();
+    ArrayList<Subject> subjectEntities = new ArrayList<>();
+    ArrayList<Consumable> consumedEntities = new ArrayList<>();
 
-    ArrayList<GameEntity> producedEntities = new ArrayList<>();
+    ArrayList<Product> producedEntities = new ArrayList<>();
 
     String narration;
 
-    public void addSubjectEntity(GameEntity subjectEntity){
+    public void addSubjectEntity(Subject subjectEntity){
         subjectEntities.add(subjectEntity);
     }
 
-    public void addConsumableEntity(GameEntity consumedEntity){
+    public void addConsumableEntity(Consumable consumedEntity){
         consumedEntities.add(consumedEntity);
     }
 
-    public void addProductEntity(GameEntity producedEntity){
+    public void addProductEntity(Product producedEntity){
         producedEntities.add(producedEntity);
     }
 
@@ -57,6 +57,10 @@ public class GameAction
 
     public String getProducedNarration(){
         return narration;
+    }
+
+    public ArrayList<Subject> getSubjectList(){
+        return subjectEntities;
     }
 
 
