@@ -42,17 +42,28 @@ public class InterpretBuiltInActionsTests {
         sendCommandToServer("simon: get key");
         sendCommandToServer("simon: goto cabin");
         String response = sendCommandToServer("simon: open trapdoor");
-        GameModel gameModel = server.gameModel;
-        //check key is consumed
-        //check key is not in inventory
-        Player currentPlayer = gameModel.getPlayerFromName("simon");
-        assertFalse(currentPlayer.subjectIsInInventory("key"));
-        //check key is in storeroom
-        Location storeroom = gameModel.getLocationFromName("storeroom");
-        assertNotNull(storeroom.getEntityFromName("key"));
         //check narration
         assertEquals(response, "You unlock the trapdoor and see steps leading down into a cellar");
+        //check key is not in inventory
+        response = sendCommandToServer("simon: inv");
+        assertFalse(response.contains("key"));
+        //check key is in storeroom
+        GameModel gameModel = server.gameModel;
+        Location storeroom = gameModel.getLocationFromName("storeroom");
+        assertNotNull(storeroom.getEntityFromName("key"));
+    }
 
-
+    @Test
+    void testInterpretChopTree() {
+        sendCommandToServer("simon: get axe");
+        sendCommandToServer("simon: goto forest");
+        String response = sendCommandToServer("simon: chop tree");
+        //check narration
+        assertEquals(response, "You cut down the tree with the axe");
+        response = sendCommandToServer("simon: look");
+        //check that tree is gone from forest
+        assertFalse(response.contains("tree"));
+        //check that log has appeared in the forest
+        assertTrue(response.contains("A heavy wooden log"));
     }
 }

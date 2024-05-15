@@ -252,14 +252,14 @@ public class STAGCommand {
     }
 
     private String interpretActionCommand(){
-        consumeEntity(currentGameAction);
-        //produceEntity()
+        consumeEntities();
+        produceEntities();
         return currentGameAction.getNarration();
     }
 
     //important: handle consuming locations
-    private void consumeEntity(GameAction gameAction) {
-        ArrayList<Consumable> consumableEntities = gameAction.getConsumableEntities();
+    private void consumeEntities() {
+        ArrayList<Consumable> consumableEntities = currentGameAction.getConsumableEntities();
         Artefact droppedArtefact;
         GameEntity consumedGameEntity;
         for (Consumable consumable : consumableEntities) {
@@ -269,12 +269,27 @@ public class STAGCommand {
             }
             if(currentLocation.subjectIsInLocation(consumable.getName())){
                 consumedGameEntity = currentLocation.getEntityFromName(consumable.getName());
+                currentLocation.removeEntity(consumable.getName());
                 gameModel.addEntityToStoreroom(consumedGameEntity);
+            }
+            //update the above, so that entities in different locations can be consumed (not just those in current location)
+        }
+    }
+
+    private void produceEntities(){
+        ArrayList<Product> producedEntities = currentGameAction.getProducedEntities();
+        //ignoring locations for now
+
+        //assuming produced entities are always in the storeroom for now (they might not be)
+        for (Product product : producedEntities) {
+            GameEntity gameEntity = gameModel.entityIsInStoreroom(product.getName());
+            if(gameEntity != null){
+                currentLocation.addEntity(gameEntity);
             }
         }
     }
 
-//test consumpiton interpreting
+
 }
 
 

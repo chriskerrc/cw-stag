@@ -250,4 +250,13 @@ public class GameModel {
         }
     }
 
+    public GameEntity entityIsInStoreroom (String entityName) {
+        for (Location location : locationsList) {
+            if (Objects.equals(location.getName(), "storeroom")) {
+                return location.getEntityFromName(entityName);
+            }
+        }
+        return null;
+    }
+
 }
