@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.File;
+import java.util.HashSet;
+import java.util.Iterator;
+
 import com.alexmerz.graphviz.Parser;
 import com.alexmerz.graphviz.ParseException;
 import com.alexmerz.graphviz.objects.Graph;
@@ -23,7 +26,6 @@ public class ParseEntitiesTests {
         File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
         File actionsFile = Paths.get("config" + File.separator + "basic-actions.xml").toAbsolutePath().toFile();
         GameServer server = new GameServer(entitiesFile, actionsFile);
-        //server.blockingListenOn(8888);
         GameModel gameModel = server.gameModel;
 
         Graph wholeDocument = gameModel.parseEntities();
@@ -35,14 +37,14 @@ public class ParseEntitiesTests {
         assertEquals("cabin", cabin.getName());
         assertEquals("A log cabin in the woods", cabin.getDescription());
         //check artefacts
-        Artefact axe = cabin.getArtefactFromName("axe");
+        Artefact axe = (Artefact) cabin.getEntityFromName("axe");
         assertEquals("axe", axe.getName());
         assertEquals("A razor sharp axe", axe.getDescription());
-        Artefact potion = cabin.getArtefactFromName("potion");
+        Artefact potion = (Artefact) cabin.getEntityFromName("potion");
         assertEquals("potion", potion.getName());
         assertEquals("Magic potion", potion.getDescription());
         //check furniture
-        Furniture trapdoor = cabin.getFurnitureFromName("trapdoor");
+        Furniture trapdoor = (Furniture) cabin.getEntityFromName("trapdoor");
         assertEquals("trapdoor", trapdoor.getName());
         assertEquals("Wooden trapdoor", trapdoor.getDescription());
 
@@ -52,14 +54,14 @@ public class ParseEntitiesTests {
         assertEquals("forest", forest.getName());
         assertEquals("A dark forest", forest.getDescription());
         //check artefacts
-        Artefact key = forest.getArtefactFromName("key");
+        Artefact key = (Artefact) forest.getEntityFromName("key");
         assertEquals("key", key.getName());
         assertEquals("Brass key", key.getDescription());
         //check potion isn't in forest
-        Artefact nullPotion = forest.getArtefactFromName("potion");
+        Artefact nullPotion = (Artefact) forest.getEntityFromName("potion");
         assertNull(nullPotion);
         //check furniture
-        Furniture tree = forest.getFurnitureFromName("tree");
+        Furniture tree = (Furniture) forest.getEntityFromName("tree");
         assertEquals("tree", tree.getName());
         assertEquals("A big tree", tree.getDescription());
 
@@ -69,11 +71,11 @@ public class ParseEntitiesTests {
         assertEquals("cellar", cellar.getName());
         assertEquals("A dusty cellar", cellar.getDescription());
         //check characters
-        Character elf = cellar.getCharacterFromName("elf");
+        Character elf = (Character) cellar.getEntityFromName("elf");
         assertEquals("elf", elf.getName());
         assertEquals("Angry Elf", elf.getDescription());
         //check key isn't in cellar
-        Artefact nullKey = cellar.getArtefactFromName("potion");
+        Artefact nullKey = (Artefact) cellar.getEntityFromName("potion");
         assertNull(nullKey);
 
         //get storeroom location
@@ -82,20 +84,27 @@ public class ParseEntitiesTests {
         assertEquals("storeroom", storeroom.getName());
         assertEquals("Storage for any entities not placed in the game", storeroom.getDescription());
         //check artefacts
-        Artefact log = storeroom.getArtefactFromName("log");
+        Artefact log = (Artefact) storeroom.getEntityFromName("log");
         assertEquals("log", log.getName());
         assertEquals("A heavy wooden log", log.getDescription());
         //check there are no characters
-        assertTrue(storeroom.isCharacterListEmpty());
+        assertTrue(storeroom.isNoCharacter());
         //check there is no furniture
-        assertTrue(storeroom.isFurnitureListEmpty());
+        assertTrue(storeroom.isNoFurniture());
 
         //paths
-        Location cabinDestination = gameModel.getDestinationFromLocation(cabin);
+
+        HashSet<Location> cabinDestinations = gameModel.getDestinationsFromLocation(cabin);
+        Location cabinDestination = cabinDestinations.stream().findFirst().orElse(null);
+        assert cabinDestination != null;
         assertEquals("forest", cabinDestination.getName());
-        Location forestDestination = gameModel.getDestinationFromLocation(forest);
+        HashSet<Location> forestDestinations = gameModel.getDestinationsFromLocation(cellar);
+        Location forestDestination = forestDestinations.stream().findFirst().orElse(null);
+        assert forestDestination != null;
         assertEquals("cabin", forestDestination.getName());
-        Location cellarDestination = gameModel.getDestinationFromLocation(cellar);
+        HashSet<Location> cellarDestinations = gameModel.getDestinationsFromLocation(cellar);
+        Location cellarDestination = cellarDestinations.stream().findFirst().orElse(null);
+        assert cellarDestination != null;
         assertEquals("cabin", cellarDestination.getName());
     }
 

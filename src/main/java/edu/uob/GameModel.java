@@ -26,7 +26,7 @@ import org.w3c.dom.NodeList;
 public class GameModel {
 
     private ArrayList<Location> locationsList = new ArrayList<>();
-    private HashMap<Location, Location> pathsMap = new HashMap<>();
+    private HashMap<Location, HashSet<Location>> pathsMap = new HashMap<>();
 
     private ArrayList<Player> playerList = new ArrayList<>();
 
@@ -105,15 +105,15 @@ public class GameModel {
             objectDescription = objectNode.getAttribute("description");
             if(Objects.equals(objectType, "artefacts")) {
                 Artefact artefact = new Artefact(objectName, objectDescription);
-                location.addArtefact(artefact);
+                location.addEntity(artefact);
             }
             if(Objects.equals(objectType, "furniture")) {
                 Furniture furniture = new Furniture(objectName, objectDescription);
-                location.addFurniture(furniture);
+                location.addEntity(furniture);
             }
             if(Objects.equals(objectType, "characters")) {
                 Character character = new Character(objectName, objectDescription);
-                location.addCharacter(character);
+                location.addEntity(character);
             }
         }
     }
@@ -130,7 +130,9 @@ public class GameModel {
             Node toLocation = edge.getTarget().getNode();
             String toName = toLocation.getId().getId();
             Location endLocation = getLocationFromName(toName);
-            pathsMap.put(startLocation,endLocation);
+            HashSet<Location> locationHashSet = new HashSet<>();
+            locationHashSet.add(endLocation);
+            pathsMap.put(startLocation,locationHashSet);
         }
     }
 
@@ -161,7 +163,6 @@ public class GameModel {
         for(Player player : playerList){
             if(Objects.equals(player.getName(), playerName)){
                 player.setCurrentLocation(newLocation);
-                System.out.println("This is the the player we're updating location on: " + player);
             }
         }
     }
@@ -170,7 +171,7 @@ public class GameModel {
         return startLocation;
     }
 
-    public Location getDestinationFromLocation(Location startLocation){
+    public HashSet<Location> getDestinationsFromLocation(Location startLocation){
         return pathsMap.get(startLocation);
     }
 
@@ -243,4 +244,40 @@ public class GameModel {
         return actionsList.get(keyphrase);
     }
 
+    public void addEntityToStoreroom (GameEntity consumedEntity){
+        for(Location location : locationsList){
+            if(Objects.equals(location.getName(), "storeroom")){
+                location.addEntity(consumedEntity);
+            }
+        }
+    }
+
+    public GameEntity entityIsInStoreroom (String entityName) {
+        for (Location location : locationsList) {
+            if (Objects.equals(location.getName(), "storeroom")) {
+                return location.getEntityFromName(entityName);
+            }
+        }
+        return null;
+    }
+
+    public boolean updatePath(String originName, String destinationName, boolean isCreatePath){
+        Location originLocation = getLocationFromName(originName);
+        Location destinationLocation = getLocationFromName(destinationName);
+        if(originLocation == null || destinationLocation == null){
+            return false;
+        }
+        HashSet<Location> destinations = pathsMap.get(originLocation);
+        if(destinations == null){
+            return false;
+        }
+        if(isCreatePath){
+            destinations.add(destinationLocation);
+        }
+        else{
+            destinations.remove(destinationLocation);
+        }
+        pathsMap.put(originLocation, destinations);
+        return true;
+    }
 }

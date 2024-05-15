@@ -45,7 +45,7 @@ public class ParseActionsTest {
         Product cellarProduct = (Product)  gameAction.getProducedEntityFromName("cellar");
         assertEquals(cellarProduct.getName(), "cellar");
         //check narration
-        String firstActionNarration = gameAction.getProducedNarration();
+        String firstActionNarration = gameAction.getNarration();
         assertEquals(firstActionNarration, "You unlock the trapdoor and see steps leading down into a cellar");
         //check that open and unlock keyphrases are mapped to same hashset of GameActions
         HashSet<GameAction> gameActionHashSetUnlock = gameModel.getGameActionHashSet("unlock");
@@ -77,7 +77,7 @@ public class ParseActionsTest {
         GameAction gameActionAttack = gameActionHashSetAttack.stream().findFirst().orElse(null);
         //check narration
         assert gameActionAttack != null;
-        String fourthActionNarration = gameActionAttack.getProducedNarration();
+        String fourthActionNarration = gameActionAttack.getNarration();
         assertEquals(fourthActionNarration, "You attack the elf, but he fights back and you lose some health");
     }
 }
