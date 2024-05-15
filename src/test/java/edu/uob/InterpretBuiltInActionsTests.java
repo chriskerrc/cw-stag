@@ -63,7 +63,7 @@ public class InterpretBuiltInActionsTests {
         response = sendCommandToServer("simon: look");
         //check that tree is gone from forest
         assertFalse(response.contains("tree"));
-        //check that log has appeared in the forest
+        //check that the log has appeared in the forest
         assertTrue(response.contains("A heavy wooden log"));
     }
 }

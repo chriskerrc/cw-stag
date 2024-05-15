@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.File;
+import java.util.HashSet;
+import java.util.Iterator;
+
 import com.alexmerz.graphviz.Parser;
 import com.alexmerz.graphviz.ParseException;
 import com.alexmerz.graphviz.objects.Graph;
@@ -90,11 +93,18 @@ public class ParseEntitiesTests {
         assertTrue(storeroom.isNoFurniture());
 
         //paths
-        Location cabinDestination = gameModel.getDestinationFromLocation(cabin);
+
+        HashSet<Location> cabinDestinations = gameModel.getDestinationsFromLocation(cabin);
+        Location cabinDestination = cabinDestinations.stream().findFirst().orElse(null);
+        assert cabinDestination != null;
         assertEquals("forest", cabinDestination.getName());
-        Location forestDestination = gameModel.getDestinationFromLocation(forest);
+        HashSet<Location> forestDestinations = gameModel.getDestinationsFromLocation(cellar);
+        Location forestDestination = forestDestinations.stream().findFirst().orElse(null);
+        assert forestDestination != null;
         assertEquals("cabin", forestDestination.getName());
-        Location cellarDestination = gameModel.getDestinationFromLocation(cellar);
+        HashSet<Location> cellarDestinations = gameModel.getDestinationsFromLocation(cellar);
+        Location cellarDestination = cellarDestinations.stream().findFirst().orElse(null);
+        assert cellarDestination != null;
         assertEquals("cabin", cellarDestination.getName());
     }
 

@@ -102,9 +102,12 @@ public class STAGCommand {
         String furnitureResponse = furnitureResponseBuilder.toString();
         String characterResponse = characterResponseBuilder.toString();
         //Paths
-        Location destinationLocation = gameModel.getDestinationFromLocation(currentLocation);
-        String destinationString = destinationLocation.getName();
-        String pathsResponse = "You can access from here: \n" + destinationString + "\n";
+        StringBuilder pathResponseBuilder = new StringBuilder();
+        HashSet<Location> destinations = gameModel.getDestinationsFromLocation(currentLocation);
+        for(Location location : destinations){
+            pathResponseBuilder.append(location.getName()).append("\n");
+        }
+        String pathsResponse = "You can access from here: \n" + pathResponseBuilder + "\n";
         return locationResponse + artefactResponse + furnitureResponse + characterResponse + pathsResponse;
     }
 
@@ -112,16 +115,15 @@ public class STAGCommand {
         if(!commandIncludesDestinationThatExists()){
             return "Did you provide a location to goto?";
         }
-        Location potentialDestination = gameModel.getDestinationFromLocation(currentLocation);
-        if(Objects.equals(potentialDestination.getName(), matchingDestinationName)){
-            gameModel.updatePlayerLocation(currentPlayerName, potentialDestination);
-            //not sure if i need to automatically do look command: example video seems to suggest so, but ExampleSTAGTests do look command after goto
-            //return interpretLookCommand();
-            return "You went to the " + potentialDestination.getName();
+        HashSet<Location> destinations = gameModel.getDestinationsFromLocation(currentLocation);
+        for(Location potentialDestination : destinations){
+            if(Objects.equals(potentialDestination.getName(), matchingDestinationName)){
+                gameModel.updatePlayerLocation(currentPlayerName, potentialDestination);
+                //not sure if i need to automatically do look command: example video seems to suggest so, but ExampleSTAGTests do look command after goto
+                return "You went to the " + potentialDestination.getName();
+            }
         }
-        else{
             return "You can't get there from here";
-        }
     }
 
     //assumes only one artefact in command for now

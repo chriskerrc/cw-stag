@@ -26,7 +26,7 @@ import org.w3c.dom.NodeList;
 public class GameModel {
 
     private ArrayList<Location> locationsList = new ArrayList<>();
-    private HashMap<Location, Location> pathsMap = new HashMap<>();
+    private HashMap<Location, HashSet<Location>> pathsMap = new HashMap<>();
 
     private ArrayList<Player> playerList = new ArrayList<>();
 
@@ -130,7 +130,9 @@ public class GameModel {
             Node toLocation = edge.getTarget().getNode();
             String toName = toLocation.getId().getId();
             Location endLocation = getLocationFromName(toName);
-            pathsMap.put(startLocation,endLocation);
+            HashSet<Location> locationHashSet = new HashSet<>();
+            locationHashSet.add(endLocation);
+            pathsMap.put(startLocation,locationHashSet);
         }
     }
 
@@ -169,7 +171,7 @@ public class GameModel {
         return startLocation;
     }
 
-    public Location getDestinationFromLocation(Location startLocation){
+    public HashSet<Location> getDestinationsFromLocation(Location startLocation){
         return pathsMap.get(startLocation);
     }
 
