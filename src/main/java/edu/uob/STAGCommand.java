@@ -103,7 +103,7 @@ public class STAGCommand {
         String characterResponse = characterResponseBuilder.toString();
         //Paths
         StringBuilder pathResponseBuilder = new StringBuilder();
-        HashSet<Location> destinations = gameModel.getDestinationsFromLocation(currentLocation);
+        HashSet<Location> destinations = gameModel.getDestinationsFromLocation(currentLocation.getName());
         for(Location location : destinations){
             pathResponseBuilder.append(location.getName()).append("\n");
         }
@@ -115,7 +115,7 @@ public class STAGCommand {
         if(!commandIncludesDestinationThatExists()){
             return "Did you provide a location to goto?";
         }
-        HashSet<Location> destinations = gameModel.getDestinationsFromLocation(currentLocation);
+        HashSet<Location> destinations = gameModel.getDestinationsFromLocation(currentLocation.getName());
         for(Location potentialDestination : destinations){
             if(Objects.equals(potentialDestination.getName(), matchingDestinationName)){
                 gameModel.updatePlayerLocation(currentPlayerName, potentialDestination);

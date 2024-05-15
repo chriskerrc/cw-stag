@@ -26,7 +26,7 @@ public class ParseEntitiesTests {
         File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
         File actionsFile = Paths.get("config" + File.separator + "basic-actions.xml").toAbsolutePath().toFile();
         GameServer server = new GameServer(entitiesFile, actionsFile);
-        GameModel gameModel = server.gameModel;
+        GameModel gameModel = server.getGameModel();
 
         Graph wholeDocument = gameModel.parseEntities();
         gameModel.storeLocations(wholeDocument);
@@ -94,15 +94,15 @@ public class ParseEntitiesTests {
 
         //paths
 
-        HashSet<Location> cabinDestinations = gameModel.getDestinationsFromLocation(cabin);
+        HashSet<Location> cabinDestinations = gameModel.getDestinationsFromLocation(cabin.getName());
         Location cabinDestination = cabinDestinations.stream().findFirst().orElse(null);
         assert cabinDestination != null;
         assertEquals("forest", cabinDestination.getName());
-        HashSet<Location> forestDestinations = gameModel.getDestinationsFromLocation(cellar);
+        HashSet<Location> forestDestinations = gameModel.getDestinationsFromLocation(cellar.getName());
         Location forestDestination = forestDestinations.stream().findFirst().orElse(null);
         assert forestDestination != null;
         assertEquals("cabin", forestDestination.getName());
-        HashSet<Location> cellarDestinations = gameModel.getDestinationsFromLocation(cellar);
+        HashSet<Location> cellarDestinations = gameModel.getDestinationsFromLocation(cellar.getName());
         Location cellarDestination = cellarDestinations.stream().findFirst().orElse(null);
         assert cellarDestination != null;
         assertEquals("cabin", cellarDestination.getName());

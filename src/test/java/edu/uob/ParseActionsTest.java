@@ -24,7 +24,7 @@ public class ParseActionsTest {
         File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
         File actionsFile = Paths.get("config" + File.separator + "basic-actions.xml").toAbsolutePath().toFile();
         GameServer server = new GameServer(entitiesFile, actionsFile);
-        GameModel gameModel = server.gameModel;
+        GameModel gameModel = server.getGameModel();
         Document actionsDocument = gameModel.parseActions();
         gameModel.storeActions(actionsDocument);
 

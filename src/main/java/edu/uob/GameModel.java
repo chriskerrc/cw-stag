@@ -26,7 +26,7 @@ import org.w3c.dom.NodeList;
 public class GameModel {
 
     private ArrayList<Location> locationsList = new ArrayList<>();
-    private HashMap<Location, HashSet<Location>> pathsMap = new HashMap<>();
+    private HashMap<String, HashSet<Location>> pathsMap = new HashMap<>();
 
     private ArrayList<Player> playerList = new ArrayList<>();
 
@@ -132,7 +132,7 @@ public class GameModel {
             Location endLocation = getLocationFromName(toName);
             HashSet<Location> locationHashSet = new HashSet<>();
             locationHashSet.add(endLocation);
-            pathsMap.put(startLocation,locationHashSet);
+            pathsMap.put(startLocation.getName(),locationHashSet);
         }
     }
 
@@ -171,8 +171,8 @@ public class GameModel {
         return startLocation;
     }
 
-    public HashSet<Location> getDestinationsFromLocation(Location startLocation){
-        return pathsMap.get(startLocation);
+    public HashSet<Location> getDestinationsFromLocation(String startLocationName){
+        return pathsMap.get(startLocationName);
     }
 
     //HANDLE ACTIONS
@@ -261,15 +261,15 @@ public class GameModel {
         return null;
     }
 
-    public boolean updatePath(String originName, String destinationName, boolean isCreatePath){
+    public void updatePath(String originName, String destinationName, boolean isCreatePath){
         Location originLocation = getLocationFromName(originName);
         Location destinationLocation = getLocationFromName(destinationName);
         if(originLocation == null || destinationLocation == null){
-            return false;
+            return;
         }
-        HashSet<Location> destinations = pathsMap.get(originLocation);
+        HashSet<Location> destinations = pathsMap.get(originLocation.getName());
         if(destinations == null){
-            return false;
+            return;
         }
         if(isCreatePath){
             destinations.add(destinationLocation);
@@ -277,7 +277,5 @@ public class GameModel {
         else{
             destinations.remove(destinationLocation);
         }
-        pathsMap.put(originLocation, destinations);
-        return true;
     }
 }

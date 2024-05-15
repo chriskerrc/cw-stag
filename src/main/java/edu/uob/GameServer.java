@@ -18,7 +18,7 @@ import org.w3c.dom.NodeList;
 
 public final class GameServer {
 
-    GameModel gameModel;
+    private GameModel gameModel;
 
     private static final char END_OF_TRANSMISSION = 4;
 
@@ -38,8 +38,7 @@ public final class GameServer {
     */
     public GameServer(File entitiesFile, File actionsFile) {
         this.gameModel = new GameModel();
-        gameModel.loadEntitiesFile(entitiesFile);
-        gameModel.loadActionsFile(actionsFile);
+        setUpGameModel(entitiesFile, actionsFile);
     }
 
     /**
@@ -52,16 +51,7 @@ public final class GameServer {
         Tokenizer tokenizer = new Tokenizer(command);
         ArrayList<String> commandTokens = tokenizer.tokenizeCommand();
         //it doesn't make sense to parse the file for every command, just the first one. but when I tried to change this, it broke...
-        try {
-            Graph wholeDocument = gameModel.parseEntities();
-            gameModel.storeLocations(wholeDocument);
-            Document actionsDocument = gameModel.parseActions();
-            gameModel.storeActions(actionsDocument);
-        } catch (FileNotFoundException | ParseException exception) {
-            return "File not found or parse exception";
-        } catch (IOException | ParserConfigurationException | SAXException e) {
-            throw new RuntimeException(e);
-        }
+
         STAGCommand stagCommand = new STAGCommand(commandTokens, gameModel);
         return stagCommand.interpretSTAGCommand();
     }
@@ -109,7 +99,21 @@ public final class GameServer {
         }
     }
 
-    private void initialiseGameModel(){
+    private void setUpGameModel(File entitiesFile, File actionsFile) {
+        try {
+            gameModel.loadEntitiesFile(entitiesFile);
+            gameModel.loadActionsFile(actionsFile);
+            Graph wholeDocument = gameModel.parseEntities();
+            gameModel.storeLocations(wholeDocument);
+            Document actionsDocument = gameModel.parseActions();
+            gameModel.storeActions(actionsDocument);
+            }
+        catch (IOException | ParseException | ParserConfigurationException | SAXException e) {
+           throw new RuntimeException("Error setting up gameModel: " + e.getMessage(), e);
+        }
+    }
 
+    public GameModel getGameModel(){
+        return gameModel;
     }
 }
