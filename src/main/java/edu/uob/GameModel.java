@@ -161,7 +161,6 @@ public class GameModel {
         for(Player player : playerList){
             if(Objects.equals(player.getName(), playerName)){
                 player.setCurrentLocation(newLocation);
-                System.out.println("This is the the player we're updating location on: " + player);
             }
         }
     }
