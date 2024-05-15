@@ -261,4 +261,23 @@ public class GameModel {
         return null;
     }
 
+    public boolean updatePath(String originName, String destinationName, boolean isCreatePath){
+        Location originLocation = getLocationFromName(originName);
+        Location destinationLocation = getLocationFromName(destinationName);
+        if(originLocation == null || destinationLocation == null){
+            return false;
+        }
+        HashSet<Location> destinations = pathsMap.get(originLocation);
+        if(destinations == null){
+            return false;
+        }
+        if(isCreatePath){
+            destinations.add(destinationLocation);
+        }
+        else{
+            destinations.remove(destinationLocation);
+        }
+        pathsMap.put(originLocation, destinations);
+        return true;
+    }
 }

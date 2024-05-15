@@ -265,6 +265,7 @@ public class STAGCommand {
         Artefact droppedArtefact;
         GameEntity consumedGameEntity;
         for (Consumable consumable : consumableEntities) {
+            Location consumedLocation = gameModel.getLocationFromName(consumable.getName());
             if (currentPlayerObject.subjectIsInInventory(consumable.getName())) {
                 droppedArtefact = currentPlayerObject.dropArtefactFromInventory(consumable.getName());
                 gameModel.addEntityToStoreroom(droppedArtefact);
@@ -274,32 +275,26 @@ public class STAGCommand {
                 currentLocation.removeEntity(consumable.getName());
                 gameModel.addEntityToStoreroom(consumedGameEntity);
             }
+            if(consumedLocation != null){
+                gameModel.updatePath(currentLocation.getName(), consumable.getName(), false);
+            }
             //update the above, so that entities in different locations can be consumed (not just those in current location)
         }
     }
 
     private void produceEntities(){
         ArrayList<Product> producedEntities = currentGameAction.getProducedEntities();
-        //ignoring locations for now
-
         //assuming produced entities are always in the storeroom for now (they might not be)
         for (Product product : producedEntities) {
             GameEntity gameEntity = gameModel.entityIsInStoreroom(product.getName());
+            Location producedLocation = gameModel.getLocationFromName(product.getName());
             if(gameEntity != null){
                 currentLocation.addEntity(gameEntity);
             }
+            if(producedLocation != null){
+                gameModel.updatePath(currentLocation.getName(), product.getName(), true);
+            }
         }
     }
-
-
 }
-
-
-//interpret production
-
-//determine if produced entity is a location
-//if it is, create a path to it
-//if it isn't, move it from storeroom to location
-
-
 //there could be an action that has no consumption or production - still output narration if triggers and subjects match
