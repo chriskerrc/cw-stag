@@ -37,9 +37,14 @@ public class Player {
         inventoryList.add(pickedUpArtefact);
     }
 
-    public Artefact dropArtefactFromInventory(Artefact artefactToDrop){
-        inventoryList.remove(artefactToDrop);
-        return artefactToDrop;
+    public Artefact dropArtefactFromInventory(String artefactName){
+        for(Artefact artefact : inventoryList){
+            if(Objects.equals(artefact.getName(), artefactName)){
+                inventoryList.remove(artefact);
+                return artefact;
+            }
+        }
+        return null;
     }
 
     public ArrayList<Artefact> getInventoryList(){

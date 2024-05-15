@@ -55,7 +55,7 @@ public class GameAction
         return null;
     }
 
-    public String getProducedNarration(){
+    public String getNarration(){
         return narration;
     }
 
@@ -64,4 +64,11 @@ public class GameAction
     }
 
 
+    public ArrayList<Product> getProducedEntities() {
+        return producedEntities;
+    }
+
+    public ArrayList<Consumable> getConsumableEntities() {
+        return consumedEntities;
+    }
 }

@@ -105,15 +105,15 @@ public class GameModel {
             objectDescription = objectNode.getAttribute("description");
             if(Objects.equals(objectType, "artefacts")) {
                 Artefact artefact = new Artefact(objectName, objectDescription);
-                location.addArtefact(artefact);
+                location.addEntity(artefact);
             }
             if(Objects.equals(objectType, "furniture")) {
                 Furniture furniture = new Furniture(objectName, objectDescription);
-                location.addFurniture(furniture);
+                location.addEntity(furniture);
             }
             if(Objects.equals(objectType, "characters")) {
                 Character character = new Character(objectName, objectDescription);
-                location.addCharacter(character);
+                location.addEntity(character);
             }
         }
     }
@@ -241,6 +241,14 @@ public class GameModel {
 
     public HashSet<GameAction> getGameActionHashSet (String keyphrase){
         return actionsList.get(keyphrase);
+    }
+
+    public void addEntityToStoreroom (GameEntity consumedEntity){
+        for(Location location : locationsList){
+            if(Objects.equals(location.getName(), "storeroom")){
+                location.addEntity(consumedEntity);
+            }
+        }
     }
 
 }

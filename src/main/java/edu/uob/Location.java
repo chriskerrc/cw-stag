@@ -5,9 +5,7 @@ import java.util.Objects;
 
 public class Location extends GameEntity {
 
-    ArrayList<Artefact> artefactList = new ArrayList<>();
-    ArrayList<Furniture> furnitureList = new ArrayList<>();
-    ArrayList<Character> characterList = new ArrayList<>();
+    ArrayList<GameEntity> entityList = new ArrayList<>();
 
     public Location(String name, String description) {
         super(name, description);
@@ -15,100 +13,71 @@ public class Location extends GameEntity {
 
     //add paths to locations
 
-    public void addArtefact(Artefact newArtefact){
-        artefactList.add(newArtefact);
+    public void addEntity(GameEntity newGameEntity){
+        entityList.add(newGameEntity);
     }
 
-    public void addFurniture(Furniture newFurniture){
-        furnitureList.add(newFurniture);
-    }
 
-    public void addCharacter(Character newCharacter){
-        characterList.add(newCharacter);
-    }
-
-    //add methods to remove artefacts
-
-    public Artefact getArtefactFromName(String artefactName){
-        for(Artefact artefact : artefactList){
-            if(Objects.equals(artefact.getName(), artefactName)){
-                return artefact;
+    public GameEntity getEntityFromName(String entityName){
+        for(GameEntity gameEntity : entityList){
+            if(Objects.equals(gameEntity.getName(), entityName)){
+                return gameEntity;
             }
         }
         return null;
     }
 
-    public Furniture getFurnitureFromName(String furnitureName){
-        for(Furniture furniture : furnitureList){
-            if(Objects.equals(furniture.getName(), furnitureName)){
-                return furniture;
+    public ArrayList<GameEntity> getEntityList(){
+        return entityList;
+    }
+
+    public boolean isNoFurniture(){
+        for(GameEntity gameEntity : entityList){
+            if(gameEntity instanceof Furniture){
+                return false;
             }
         }
-        return null;
+        return true;
     }
 
-    public Character getCharacterFromName(String characterName){
-        for(Character character : characterList){
-            if(Objects.equals(character.getName(), characterName)){
-                return character;
+    public boolean isNoCharacter(){
+        for(GameEntity gameEntity : entityList){
+            if(gameEntity instanceof Character){
+                return false;
             }
         }
-        return null;
+        return true;
     }
 
-    public ArrayList<Artefact> getArtefactList(){
-        return artefactList;
-    }
-
-    public ArrayList<Furniture> getFurnitureList(){
-        return furnitureList;
-    }
-
-    public ArrayList<Character> getCharacterList(){
-        return characterList;
-    }
-    public boolean isFurnitureListEmpty(){
-        return furnitureList.isEmpty();
-    }
-
-    public boolean isCharacterListEmpty(){
-        return characterList.isEmpty();
-    }
-
-    public boolean isArtefactListEmpty(){
-        return artefactList.isEmpty();
+    public boolean isNoArtefact(){
+        for(GameEntity gameEntity : entityList){
+            if(gameEntity instanceof Furniture){
+                return false;
+            }
+        }
+        return true;
     }
 
     //think about matching by case e.g. "key and "kEY"
-    public Artefact removeArtefact(String artefactName){
-        for(Artefact artefact : artefactList){
-            if(Objects.equals(artefact.getName(), artefactName)){
-                artefactList.remove(artefact);
-                return artefact;
+    public GameEntity removeEntity(String entityName){
+        for(GameEntity gameEntity : entityList){
+            if(Objects.equals(gameEntity.getName(), entityName)){
+                entityList.remove(gameEntity);
+                return gameEntity;
             }
         }
         return null;
     }
 
-    //can I do this without duplicating code?
-
     public boolean subjectIsInLocation(String subjectName){
-        for (Artefact artefact : artefactList){
-            if(Objects.equals(artefact.getName(), subjectName)){
-                return true;
-            }
-        }
-        for (Furniture furniture : furnitureList){
-            if(Objects.equals(furniture.getName(), subjectName)){
-                return true;
-            }
-        }
-        for (Character character : characterList){
-            if(Objects.equals(character.getName(), subjectName)){
+        for (GameEntity gameEntity : entityList) {
+            if (Objects.equals(gameEntity.getName(), subjectName)) {
                 return true;
             }
         }
         return false;
     }
+
+
 
 }
