@@ -26,7 +26,7 @@ public class STAGCommand {
     }
 
     public String interpretSTAGCommand(){
-        String response = "Command not recognised";
+        String commandResponse = "Command not recognised";
         getPlayerNameFromCommand();
         Player potentialPlayer = gameModel.getPlayerFromName(currentPlayerName);
         if(potentialPlayer != null){
@@ -37,31 +37,38 @@ public class STAGCommand {
             currentPlayerObject = gameModel.getPlayerFromName(currentPlayerName);
         }
         currentLocation = currentPlayerObject.getCurrentLocation();
+        boolean actionExecuted = false;
         for(String token : commandTokens){
             if(token.toLowerCase().contains("look")){
-                response = interpretLookCommand();
+                commandResponse = interpretLookCommand();
             }
             if(token.toLowerCase().contains("goto")){
-                response = interpretGotoCommand();
+                commandResponse = interpretGotoCommand();
             }
             if(token.toLowerCase().contains("get")){
-                response = interpretGetCommand();
+                commandResponse = interpretGetCommand();
             }
-            if(token.toLowerCase().contains("inv")){
-                response = interpretInvCommand();
-            }
-            if(token.toLowerCase().contains("inventory")){ //alternative to "inv"
-                response = interpretInvCommand();
+            if(token.toLowerCase().contains("inv") || token.toLowerCase().contains("inventory")){
+                commandResponse = interpretInvCommand();
             }
             if(token.toLowerCase().contains("drop")){
-                response = interpretDropCommand();
+                commandResponse = interpretDropCommand();
             }
-            if(actionCommandIsValid()){
-                response = interpretActionCommand();
+            if(token.toLowerCase().contains("health")){
+                commandResponse = interpretHealthCommand();
+            }
+            if(actionCommandIsValid() && !actionExecuted){
+                commandResponse = interpretActionCommand();
+                actionExecuted = true;
             }
         }
-        return response;
+        if(currentPlayerObject.getPlayerHealth() == 0){
+            currentPlayerObject.killPlayer();
+            commandResponse = "You died and lost all of your items, you must return to the start of the game";
+        }
+        return commandResponse;
     }
+
 
     private void getPlayerNameFromCommand(){
         String playerName = commandTokens.get(0);
@@ -157,6 +164,13 @@ public class STAGCommand {
         String artefactsInInventory = inventoryResponseBuilder.toString();
         return inventoryResponse + artefactsInInventory;
     }
+
+    private String interpretHealthCommand() {
+        int currentHealth = currentPlayerObject.getPlayerHealth();
+        String healthNumber = String.valueOf(currentHealth);
+        return "Your current health level is " + healthNumber;
+    }
+
 
     //this method assumes that there is only one destination in command -  to do: guard against there being two
     private boolean commandIncludesDestinationThatExists(){
@@ -265,18 +279,22 @@ public class STAGCommand {
         Artefact droppedArtefact;
         GameEntity consumedGameEntity;
         for (Consumable consumable : consumableEntities) {
-            Location consumedLocation = gameModel.getLocationFromName(consumable.getName());
-            if (currentPlayerObject.subjectIsInInventory(consumable.getName())) {
-                droppedArtefact = currentPlayerObject.dropArtefactFromInventory(consumable.getName());
-                gameModel.addEntityToStoreroom(droppedArtefact);
+            String consumableName = consumable.getName();
+            Location consumedLocation = gameModel.getLocationFromName(consumableName);
+            if (currentPlayerObject.subjectIsInInventory(consumableName)) {
+                droppedArtefact = currentPlayerObject.dropArtefactFromInventory(consumableName);
+                gameModel.addEntityToLocation("storeroom", droppedArtefact);
             }
-            if(currentLocation.subjectIsInLocation(consumable.getName())){
-                consumedGameEntity = currentLocation.getEntityFromName(consumable.getName());
-                currentLocation.removeEntity(consumable.getName());
-                gameModel.addEntityToStoreroom(consumedGameEntity);
+            if(currentLocation.subjectIsInLocation(consumableName)){
+                consumedGameEntity = currentLocation.getEntityFromName(consumableName);
+                currentLocation.removeEntity(consumableName);
+                gameModel.addEntityToLocation("storeroom", consumedGameEntity);
             }
             if(consumedLocation != null){
-                gameModel.updatePath(currentLocation.getName(), consumable.getName(), false);
+                gameModel.updatePath(currentLocation.getName(), consumableName, false);
+            }
+            if(Objects.equals(consumableName, "health")){
+                currentPlayerObject.decreasePlayerHealth();
             }
             //update the above, so that entities in different locations can be consumed (not just those in current location)
         }
@@ -286,13 +304,17 @@ public class STAGCommand {
         ArrayList<Product> producedEntities = currentGameAction.getProducedEntities();
         //assuming produced entities are always in the storeroom for now (they might not be)
         for (Product product : producedEntities) {
-            GameEntity gameEntity = gameModel.entityIsInStoreroom(product.getName());
-            Location producedLocation = gameModel.getLocationFromName(product.getName());
+            String productName = product.getName();
+            GameEntity gameEntity = gameModel.entityIsInStoreroom(productName);
+            Location producedLocation = gameModel.getLocationFromName(productName);
             if(gameEntity != null){
                 currentLocation.addEntity(gameEntity);
             }
             if(producedLocation != null){
-                gameModel.updatePath(currentLocation.getName(), product.getName(), true);
+                gameModel.updatePath(currentLocation.getName(), productName, true);
+            }
+            if(Objects.equals(productName, "health")){
+                currentPlayerObject.increasePlayerHealth();
             }
         }
     }

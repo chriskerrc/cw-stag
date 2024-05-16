@@ -106,4 +106,73 @@ public class InterpretBuiltInActionsTests {
         response = sendCommandToServer("simon: inv");
         assertFalse(response.contains("potion"));
     }
+
+    @Test
+    void testInterpretFightElfReducesHealth() {
+        String response = sendCommandToServer("simon: health");
+        //check that player starts with full health
+        assertTrue(response.contains("3"));
+        sendCommandToServer("simon: get potion");
+        sendCommandToServer("simon: goto forest");
+        sendCommandToServer("simon: get key");
+        sendCommandToServer("simon: goto cabin");
+        sendCommandToServer("simon: open trapdoor");
+        sendCommandToServer("simon: goto cellar");
+        response = sendCommandToServer("simon: hit elf");
+        assertTrue(response.contains("You attack the elf, but he fights back and you lose some health"));
+        response = sendCommandToServer("simon: health");
+        //check that fighting elf decreases health
+        assertTrue(response.contains("2"));
+        response = sendCommandToServer("simon: drink potion");
+        assertTrue(response.contains("You drink the potion and your health improves"));
+        response = sendCommandToServer("simon: health");
+        //check that potion has increased health
+        assertTrue(response.contains("3"));
+    }
+
+    @Test
+    void testInterpretHealthCeiling() {
+        sendCommandToServer("simon: get potion");
+        //check that you can still drink potion with full health
+        String response = sendCommandToServer("simon: drink potion");
+        assertTrue(response.contains("You drink the potion and your health improves"));
+        //check that health hasn't increased above maximum
+        response = sendCommandToServer("simon: health");
+        assertTrue(response.contains("3"));
+    }
+
+    @Test
+    void testInterpretPlayerDies() {
+        String response = sendCommandToServer("chris: look");
+        assertTrue(response.contains("potion"));
+        sendCommandToServer("simon: get potion");
+        sendCommandToServer("simon: goto forest");
+        sendCommandToServer("chris: look");
+        sendCommandToServer("simon: get key");
+        sendCommandToServer("simon: goto cabin");
+        sendCommandToServer("simon: open trapdoor");
+        sendCommandToServer("simon: goto cellar");
+        //hit elf 3 times to lose all health
+        sendCommandToServer("simon: hit elf");
+        sendCommandToServer("simon: hit elf");
+        response = sendCommandToServer("simon: hit elf");
+        assertTrue(response.contains("died"));
+        assertTrue(response.contains("lost"));
+        assertTrue(response.contains("return"));
+        //check that Chris can use path Simon opened up to Cellar
+        sendCommandToServer("chris: goto cellar");
+        response = sendCommandToServer("chris: look");
+        assertTrue(response.contains("Elf"));
+        //check Chris can see potion Simon dropped when he died in cellar
+        response = sendCommandToServer("chris: look");
+        assertTrue(response.contains("potion"));
+        //check that simon's inventory doesn't contain the potion
+        response = sendCommandToServer("simon: inv");
+        assertFalse(response.contains("potion"));
+        //check that simon's health is 3
+        response = sendCommandToServer("simon: health");
+        assertTrue(response.contains("3"));
+    }
+
+
 }
