@@ -244,9 +244,9 @@ public class GameModel {
         return actionsList.get(keyphrase);
     }
 
-    public void addEntityToStoreroom (GameEntity consumedEntity){
+    public void addEntityToLocation (String locationName, GameEntity consumedEntity){
         for(Location location : locationsList){
-            if(Objects.equals(location.getName(), "storeroom")){
+            if(Objects.equals(location.getName(), locationName)){
                 location.addEntity(consumedEntity);
             }
         }

@@ -11,6 +11,8 @@ public class Player {
 
     private String name;
 
+    private int playerHealth;
+
     private ArrayList<Artefact> inventoryList = new ArrayList<>();
 
 
@@ -18,6 +20,7 @@ public class Player {
         this.gameModel = gameModel;
         this.currentLocation = gameModel.getStartLocation();
         this.name = name;
+        playerHealth = 3;
     }
 
     public String getName()
@@ -47,6 +50,30 @@ public class Player {
         return null;
     }
 
+    public void killPlayer(){
+        emptyInventory();
+        movePlayerToStartLocation();
+        resetPlayerHealth();
+    }
+
+    private void emptyInventory(){
+        ArrayList<Artefact> artefactsToDrop = new ArrayList<>(inventoryList);
+        for(Artefact artefact : artefactsToDrop){
+            inventoryList.remove(artefact);
+            gameModel.addEntityToLocation(currentLocation.getName(), artefact);
+        }
+    }
+
+    private void movePlayerToStartLocation() {
+        currentLocation = gameModel.getStartLocation();
+    }
+
+    private void resetPlayerHealth(){
+        playerHealth = 3;
+    }
+
+
+
     public ArrayList<Artefact> getInventoryList(){
         return inventoryList;
     }
@@ -59,6 +86,23 @@ public class Player {
         }
         return false;
     }
+
+    public void increasePlayerHealth(){
+        if(playerHealth < 3){
+            playerHealth++;
+        }
+    }
+
+    public void decreasePlayerHealth(){
+        if(playerHealth > 0){
+            playerHealth--;
+        }
+    }
+
+    public int getPlayerHealth(){
+        return playerHealth;
+    }
+
 
 
 }
