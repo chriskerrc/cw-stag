@@ -124,7 +124,6 @@ public class STAGCommand {
         }
         HashSet<Location> destinations = gameModel.getDestinationsFromLocation(currentLocation.getName());
         for(Location potentialDestination : destinations){
-            System.out.println("Potential destination: " + potentialDestination.getName());
             if(Objects.equals(potentialDestination.getName(), matchingDestinationName)){
                 gameModel.updatePlayerLocation(currentPlayerName, potentialDestination);
                 //not sure if i need to automatically do look command: example video seems to suggest so, but ExampleSTAGTests do look command after goto

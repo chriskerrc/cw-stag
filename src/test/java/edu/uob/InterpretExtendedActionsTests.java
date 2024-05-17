@@ -35,28 +35,24 @@ public class InterpretExtendedActionsTests {
         sendCommandToServer("simon: get key");
         sendCommandToServer("simon: goto cabin");
         String response = sendCommandToServer("simon: look");
-        System.out.println("what you see in the cabin " + response);
         assertTrue(response.contains("cabin"));
-
-        /*
         sendCommandToServer("simon: open trapdoor");
         sendCommandToServer("simon: goto cellar");
         //check can see elf with description
         response = sendCommandToServer("simon: look");
-        System.out.println("what you see in the cellar " + response);
-        assertTrue(response.contains("angry looking elf"));
+        assertTrue(response.contains("angry looking"));
         response = sendCommandToServer("simon: pay elf");
         //check narration
         assertTrue(response.contains("You pay the elf your silver coin and he produces a shovel"));
-        //check shovel is in cabin
+        //check shovel is in cellar
         response = sendCommandToServer("simon: look");
         assertTrue(response.contains("shovel"));
         assertTrue(response.contains("sturdy"));
         sendCommandToServer("simon: get shovel");
         //check shovel is in inv
-        response = sendCommandToServer("simon: inventory");
+        response = sendCommandToServer("simon: inv");
         assertTrue(response.contains("shovel"));
-
+/*
         //Bridge river to clearing
         sendCommandToServer("simon: goto cabin");
         sendCommandToServer("simon: get potion");
@@ -99,8 +95,7 @@ public class InterpretExtendedActionsTests {
         sendCommandToServer("simon: get gold");
         response = sendCommandToServer("simon: inv");
         assertTrue(response.contains("gold"));
-
-       */
-
+*/
+        //lumberjack
     }
 }
