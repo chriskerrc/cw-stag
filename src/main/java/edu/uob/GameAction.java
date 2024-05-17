@@ -7,10 +7,8 @@ public class GameAction
 {
     ArrayList<Subject> subjectEntities = new ArrayList<>();
     ArrayList<Consumable> consumedEntities = new ArrayList<>();
-
     ArrayList<Product> producedEntities = new ArrayList<>();
-
-    String narration;
+    String actionNarration;
 
     public void addSubjectEntity(Subject subjectEntity){
         subjectEntities.add(subjectEntity);
@@ -25,7 +23,7 @@ public class GameAction
     }
 
     public void setNarration(String inputNarration){
-        narration = inputNarration;
+        actionNarration = inputNarration;
     }
 
     public GameEntity getSubjectEntityFromName(String entityName){
@@ -56,13 +54,12 @@ public class GameAction
     }
 
     public String getNarration(){
-        return narration;
+        return actionNarration;
     }
 
     public ArrayList<Subject> getSubjectList(){
         return subjectEntities;
     }
-
 
     public ArrayList<Product> getProducedEntities() {
         return producedEntities;

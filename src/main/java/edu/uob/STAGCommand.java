@@ -273,7 +273,7 @@ public class STAGCommand {
                 gameModel.addEntityToLocation("storeroom", consumedGameEntity);
             }
             if(consumedLocation != null){
-                gameModel.updatePath(currentLocation.getName(), consumableName, false);
+                gameModel.updateLocationPath(currentLocation.getName(), consumableName, false);
             }
             if(Objects.equals(consumableName, "health")){
                 currentPlayerObject.decreasePlayerHealth();
@@ -292,7 +292,7 @@ public class STAGCommand {
                 currentLocation.addEntity(gameEntity);
             }
             if(producedLocation != null){
-                gameModel.updatePath(currentLocation.getName(), productName, true);
+                gameModel.updateLocationPath(currentLocation.getName(), productName, true);
             }
             if(Objects.equals(productName, "health")){
                 currentPlayerObject.increasePlayerHealth();
