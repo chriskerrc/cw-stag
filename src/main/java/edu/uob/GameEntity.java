@@ -1,26 +1,21 @@
 package edu.uob;
 
-import java.util.ArrayList;
-
 public abstract class GameEntity
 {
-    private String name;
-    private String description;
+    private final String entityName;
+    private final String entityDescription;
 
-
-    public GameEntity(String name, String description)
+    public GameEntity(String entityName, String entityDescription)
     {
-        this.name = name;
-        this.description = description;
+        this.entityName = entityName;
+        this.entityDescription = entityDescription;
     }
 
-    public String getName()
-    {
-        return name;
+    public String getName() {
+        return entityName;
     }
 
-    public String getDescription()
-    {
-        return description;
+    public String getDescription() {
+        return entityDescription;
     }
 }

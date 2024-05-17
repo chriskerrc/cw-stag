@@ -51,7 +51,7 @@ public class Location extends GameEntity {
 
     public boolean isNoArtefact(){
         for(GameEntity gameEntity : entityList){
-            if(gameEntity instanceof Furniture){
+            if(gameEntity instanceof Artefact){
                 return false;
             }
         }

@@ -26,7 +26,7 @@ public class STAGCommand {
     }
 
     public String interpretSTAGCommand(){
-        String response = "Command not recognised";
+        String commandResponse = "Command not recognised";
         getPlayerNameFromCommand();
         Player potentialPlayer = gameModel.getPlayerFromName(currentPlayerName);
         if(potentialPlayer != null){
@@ -37,37 +37,44 @@ public class STAGCommand {
             currentPlayerObject = gameModel.getPlayerFromName(currentPlayerName);
         }
         currentLocation = currentPlayerObject.getCurrentLocation();
+        boolean actionExecuted = false;
         for(String token : commandTokens){
             if(token.toLowerCase().contains("look")){
-                response = interpretLookCommand();
+                commandResponse = interpretLookCommand();
             }
             if(token.toLowerCase().contains("goto")){
-                response = interpretGotoCommand();
+                commandResponse = interpretGotoCommand();
             }
             if(token.toLowerCase().contains("get")){
-                response = interpretGetCommand();
+                commandResponse = interpretGetCommand();
             }
-            if(token.toLowerCase().contains("inv")){
-                response = interpretInvCommand();
-            }
-            if(token.toLowerCase().contains("inventory")){ //alternative to "inv"
-                response = interpretInvCommand();
+            if(token.toLowerCase().contains("inv") || token.toLowerCase().contains("inventory")){
+                commandResponse = interpretInvCommand();
             }
             if(token.toLowerCase().contains("drop")){
-                response = interpretDropCommand();
+                commandResponse = interpretDropCommand();
             }
-            if(actionCommandIsValid()){
-                response = interpretActionCommand();
+            if(token.toLowerCase().contains("health")){
+                commandResponse = interpretHealthCommand();
+            }
+            if(actionCommandIsValid() && !actionExecuted){
+                commandResponse = interpretActionCommand();
+                actionExecuted = true;
             }
         }
-        return response;
+        if(currentPlayerObject.getPlayerHealth() == 0){
+            currentPlayerObject.killPlayer();
+            commandResponse = "You died and lost all of your items, you must return to the start of the game";
+        }
+        return commandResponse;
     }
+
 
     private void getPlayerNameFromCommand(){
         String playerName = commandTokens.get(0);
         if(playerName.contains(":")) {
             playerName = playerName.replaceAll(":$", ""); //remove colon
-            playerName = playerName.toLowerCase(); // "Simon" is the same as "simon"
+            playerName = playerName.toLowerCase(); // "Simon" is the same as "simon" - this is wrong
         }
         else{
             playerName = null;
@@ -75,40 +82,24 @@ public class STAGCommand {
         currentPlayerName = playerName;
     }
 
-    //try to implement subclasses that extend this class e.g. Look
-
-    //this method is too long
     private String interpretLookCommand(){
         String currentLocationDescription = currentLocation.getDescription();
-        String locationResponse = "You are in " + currentLocationDescription + ". You can see:\n"; //does newline char work on all OSes?
-        //Important: some of this code won't be specific to look command - generalise it out
-        ArrayList<GameEntity> entityList = currentLocation.getEntityList();
-        StringBuilder artefactResponseBuilder = new StringBuilder();
-        StringBuilder furnitureResponseBuilder = new StringBuilder();
-        StringBuilder characterResponseBuilder = new StringBuilder();
-        for (GameEntity gameEntity : entityList) {
-            if(gameEntity instanceof Artefact){
-                artefactResponseBuilder.append(gameEntity.getDescription()).append("\n");
-            }
-            if(gameEntity instanceof Furniture){
-                furnitureResponseBuilder.append(gameEntity.getDescription()).append("\n");
-            }
-            if(gameEntity instanceof Character){
-                characterResponseBuilder.append(gameEntity.getDescription()).append("\n");
-            }
-
+        StringBuilder responseBuilder = new StringBuilder();
+        responseBuilder.append("You are in ").append(currentLocationDescription).append(". You can see:\n"); //does newline char work on all OSes?
+        for (GameEntity gameEntity : currentLocation.getEntityList()) {
+            responseBuilder.append(gameEntity.getDescription()).append("\n");
         }
-        String artefactResponse = artefactResponseBuilder.toString();
-        String furnitureResponse = furnitureResponseBuilder.toString();
-        String characterResponse = characterResponseBuilder.toString();
-        //Paths
-        StringBuilder pathResponseBuilder = new StringBuilder();
+        for (Player playerInGame : gameModel.getPlayersInGame()){
+            if(playerInGame != currentPlayerObject){
+                responseBuilder.append("A player called ").append(playerInGame.getName()).append("\n");;
+            }
+        }
+        responseBuilder.append("You can access from here: \n");
         HashSet<Location> destinations = gameModel.getDestinationsFromLocation(currentLocation.getName());
         for(Location location : destinations){
-            pathResponseBuilder.append(location.getName()).append("\n");
+            responseBuilder.append(location.getName()).append("\n");
         }
-        String pathsResponse = "You can access from here: \n" + pathResponseBuilder + "\n";
-        return locationResponse + artefactResponse + furnitureResponse + characterResponse + pathsResponse;
+        return responseBuilder.toString();
     }
 
     private String interpretGotoCommand(){
@@ -156,6 +147,12 @@ public class STAGCommand {
         }
         String artefactsInInventory = inventoryResponseBuilder.toString();
         return inventoryResponse + artefactsInInventory;
+    }
+
+    private String interpretHealthCommand() {
+        int currentHealth = currentPlayerObject.getPlayerHealth();
+        String healthNumber = String.valueOf(currentHealth);
+        return "Your current health level is " + healthNumber;
     }
 
     //this method assumes that there is only one destination in command -  to do: guard against there being two
@@ -259,24 +256,27 @@ public class STAGCommand {
         return currentGameAction.getNarration();
     }
 
-    //important: handle consuming locations
     private void consumeEntities() {
         ArrayList<Consumable> consumableEntities = currentGameAction.getConsumableEntities();
         Artefact droppedArtefact;
         GameEntity consumedGameEntity;
         for (Consumable consumable : consumableEntities) {
-            Location consumedLocation = gameModel.getLocationFromName(consumable.getName());
-            if (currentPlayerObject.subjectIsInInventory(consumable.getName())) {
-                droppedArtefact = currentPlayerObject.dropArtefactFromInventory(consumable.getName());
-                gameModel.addEntityToStoreroom(droppedArtefact);
+            String consumableName = consumable.getName();
+            Location consumedLocation = gameModel.getLocationFromName(consumableName);
+            if (currentPlayerObject.subjectIsInInventory(consumableName)) {
+                droppedArtefact = currentPlayerObject.dropArtefactFromInventory(consumableName);
+                gameModel.addEntityToLocation("storeroom", droppedArtefact);
             }
-            if(currentLocation.subjectIsInLocation(consumable.getName())){
-                consumedGameEntity = currentLocation.getEntityFromName(consumable.getName());
-                currentLocation.removeEntity(consumable.getName());
-                gameModel.addEntityToStoreroom(consumedGameEntity);
+            if(currentLocation.subjectIsInLocation(consumableName)){
+                consumedGameEntity = currentLocation.getEntityFromName(consumableName);
+                currentLocation.removeEntity(consumableName);
+                gameModel.addEntityToLocation("storeroom", consumedGameEntity);
             }
             if(consumedLocation != null){
-                gameModel.updatePath(currentLocation.getName(), consumable.getName(), false);
+                gameModel.updateLocationPath(currentLocation.getName(), consumableName, false);
+            }
+            if(Objects.equals(consumableName, "health")){
+                currentPlayerObject.decreasePlayerHealth();
             }
             //update the above, so that entities in different locations can be consumed (not just those in current location)
         }
@@ -284,17 +284,19 @@ public class STAGCommand {
 
     private void produceEntities(){
         ArrayList<Product> producedEntities = currentGameAction.getProducedEntities();
-        //assuming produced entities are always in the storeroom for now (they might not be)
         for (Product product : producedEntities) {
-            GameEntity gameEntity = gameModel.entityIsInStoreroom(product.getName());
-            Location producedLocation = gameModel.getLocationFromName(product.getName());
+            String productName = product.getName();
+            GameEntity gameEntity = gameModel.getEntityFromItsCurrentLocation(productName);
+            Location producedLocation = gameModel.getLocationFromName(productName);
             if(gameEntity != null){
                 currentLocation.addEntity(gameEntity);
             }
             if(producedLocation != null){
-                gameModel.updatePath(currentLocation.getName(), product.getName(), true);
+                gameModel.updateLocationPath(currentLocation.getName(), productName, true);
+            }
+            if(Objects.equals(productName, "health")){
+                currentPlayerObject.increasePlayerHealth();
             }
         }
     }
 }
-//there could be an action that has no consumption or production - still output narration if triggers and subjects match

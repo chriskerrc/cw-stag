@@ -18,7 +18,7 @@ import org.w3c.dom.NodeList;
 
 public final class GameServer {
 
-    private GameModel gameModel;
+    private final GameModel gameModel;
 
     private static final char END_OF_TRANSMISSION = 4;
 
@@ -48,10 +48,8 @@ public final class GameServer {
     * @param command The incoming command to be processed
     */
     public String handleCommand(String command) {
-        Tokenizer tokenizer = new Tokenizer(command);
-        ArrayList<String> commandTokens = tokenizer.tokenizeCommand();
-        //it doesn't make sense to parse the file for every command, just the first one. but when I tried to change this, it broke...
-
+        Tokenizer commandTokenizer = new Tokenizer(command);
+        ArrayList<String> commandTokens = commandTokenizer.tokenizeCommand();
         STAGCommand stagCommand = new STAGCommand(commandTokens, gameModel);
         return stagCommand.interpretSTAGCommand();
     }
