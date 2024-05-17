@@ -220,6 +220,28 @@ public class InterpretBasicActionsTests {
         assertTrue(response.contains("isn't"));
     }
 
+    @Test
+    void testSeeOtherPlayersWithLook() {
+        //register three players
+        sendCommandToServer("simon: look");
+        sendCommandToServer("chris: look");
+        sendCommandToServer("joe: look");
+        //check Simon can see Joe and Chris in cabin, but not himself
+        String response = sendCommandToServer("simon: look");
+        assertTrue(response.contains("player"));
+        assertTrue(response.contains("chris"));
+        assertTrue(response.contains("joe"));
+        assertFalse(response.contains("simon"));
+        System.out.println(response);
+        //check Chris can see Joe and Simon in cabin, but not himself
+        response = sendCommandToServer("chris: look");
+        assertTrue(response.contains("player"));
+        assertFalse(response.contains("chris"));
+        assertTrue(response.contains("joe"));
+        assertTrue(response.contains("simon"));
+    }
+
+
 
 
 }

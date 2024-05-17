@@ -89,6 +89,11 @@ public class STAGCommand {
         for (GameEntity gameEntity : currentLocation.getEntityList()) {
             responseBuilder.append(gameEntity.getDescription()).append("\n");
         }
+        for (Player playerInGame : gameModel.getPlayersInGame()){
+            if(playerInGame != currentPlayerObject){
+                responseBuilder.append("A player called ").append(playerInGame.getName()).append("\n");;
+            }
+        }
         responseBuilder.append("You can access from here: \n");
         HashSet<Location> destinations = gameModel.getDestinationsFromLocation(currentLocation.getName());
         for(Location location : destinations){

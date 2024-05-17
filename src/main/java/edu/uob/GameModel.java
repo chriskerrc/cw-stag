@@ -162,6 +162,10 @@ public class GameModel {
         return null;
     }
 
+    public ArrayList<Player> getPlayersInGame(){
+        return playerList;
+    }
+
     public void updatePlayerLocation(String playerName, Location newLocation){
         for(Player player : playerList){
             if(Objects.equals(player.getName(), playerName)){
