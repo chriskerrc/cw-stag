@@ -72,6 +72,34 @@ public class InterpretBasicActionsTests {
     }
 
     @Test
+    void testCommandWordOrderingOne() {
+        sendCommandToServer("simon: get axe");
+        sendCommandToServer("simon: goto forest");
+        String response = sendCommandToServer("simon: chop tree with axe");
+        //check narration
+        assertEquals(response, "You cut down the tree with the axe");
+        response = sendCommandToServer("simon: look");
+        //check that tree is gone from forest
+        assertFalse(response.contains("tree"));
+        //check that the log has appeared in the forest
+        assertTrue(response.contains("A heavy wooden log"));
+    }
+
+    @Test
+    void testCommandWordOrderingTwo() {
+        sendCommandToServer("simon: get axe");
+        sendCommandToServer("simon: goto forest");
+        String response = sendCommandToServer("simon: use axe to chop tree");
+        //check narration
+        assertEquals(response, "You cut down the tree with the axe");
+        response = sendCommandToServer("simon: look");
+        //check that tree is gone from forest
+        assertFalse(response.contains("tree"));
+        //check that the log has appeared in the forest
+        assertTrue(response.contains("A heavy wooden log"));
+    }
+
+    @Test
     void testInterpretChopTreeTwoTriggers() {
         sendCommandToServer("simon: get axe");
         sendCommandToServer("simon: goto forest");
@@ -178,6 +206,20 @@ public class InterpretBasicActionsTests {
         response = sendCommandToServer("simon: health");
         assertTrue(response.contains("3"));
     }
+
+    @Test
+    void testUnableGotoCurrentLocation() {
+        String response = sendCommandToServer("simon: goto cabin");
+        assertTrue(response.contains("can't"));
+    }
+
+    @Test
+    void testUnablePerformActionIfAnotherPlayerHasEntity() {
+        sendCommandToServer("simon: get axe");
+        String response = sendCommandToServer("chris: get axe");
+        assertTrue(response.contains("isn't"));
+    }
+
 
 
 }

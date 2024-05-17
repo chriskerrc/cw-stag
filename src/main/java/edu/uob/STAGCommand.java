@@ -82,40 +82,19 @@ public class STAGCommand {
         currentPlayerName = playerName;
     }
 
-    //try to implement subclasses that extend this class e.g. Look
-
-    //this method is too long
     private String interpretLookCommand(){
         String currentLocationDescription = currentLocation.getDescription();
-        String locationResponse = "You are in " + currentLocationDescription + ". You can see:\n"; //does newline char work on all OSes?
-        //Important: some of this code won't be specific to look command - generalise it out
-        ArrayList<GameEntity> entityList = currentLocation.getEntityList();
-        StringBuilder artefactResponseBuilder = new StringBuilder();
-        StringBuilder furnitureResponseBuilder = new StringBuilder();
-        StringBuilder characterResponseBuilder = new StringBuilder();
-        for (GameEntity gameEntity : entityList) {
-            if(gameEntity instanceof Artefact){
-                artefactResponseBuilder.append(gameEntity.getDescription()).append("\n");
-            }
-            if(gameEntity instanceof Furniture){
-                furnitureResponseBuilder.append(gameEntity.getDescription()).append("\n");
-            }
-            if(gameEntity instanceof Character){
-                characterResponseBuilder.append(gameEntity.getDescription()).append("\n");
-            }
-
+        StringBuilder responseBuilder = new StringBuilder();
+        responseBuilder.append("You are in ").append(currentLocationDescription).append(". You can see:\n"); //does newline char work on all OSes?
+        for (GameEntity gameEntity : currentLocation.getEntityList()) {
+            responseBuilder.append(gameEntity.getDescription()).append("\n");
         }
-        String artefactResponse = artefactResponseBuilder.toString();
-        String furnitureResponse = furnitureResponseBuilder.toString();
-        String characterResponse = characterResponseBuilder.toString();
-        //Paths
-        StringBuilder pathResponseBuilder = new StringBuilder();
+        responseBuilder.append("You can access from here: \n");
         HashSet<Location> destinations = gameModel.getDestinationsFromLocation(currentLocation.getName());
         for(Location location : destinations){
-            pathResponseBuilder.append(location.getName()).append("\n");
+            responseBuilder.append(location.getName()).append("\n");
         }
-        String pathsResponse = "You can access from here: \n" + pathResponseBuilder + "\n";
-        return locationResponse + artefactResponse + furnitureResponse + characterResponse + pathsResponse;
+        return responseBuilder.toString();
     }
 
     private String interpretGotoCommand(){
@@ -316,4 +295,3 @@ public class STAGCommand {
         }
     }
 }
-//there could be an action that has no consumption or production - still output narration if triggers and subjects match
