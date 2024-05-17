@@ -74,7 +74,7 @@ public class STAGCommand {
         String playerName = commandTokens.get(0);
         if(playerName.contains(":")) {
             playerName = playerName.replaceAll(":$", ""); //remove colon
-            playerName = playerName.toLowerCase(); // "Simon" is the same as "simon"
+            playerName = playerName.toLowerCase(); // "Simon" is the same as "simon" - this is wrong
         }
         else{
             playerName = null;
@@ -124,6 +124,7 @@ public class STAGCommand {
         }
         HashSet<Location> destinations = gameModel.getDestinationsFromLocation(currentLocation.getName());
         for(Location potentialDestination : destinations){
+            System.out.println("Potential destination: " + potentialDestination.getName());
             if(Objects.equals(potentialDestination.getName(), matchingDestinationName)){
                 gameModel.updatePlayerLocation(currentPlayerName, potentialDestination);
                 //not sure if i need to automatically do look command: example video seems to suggest so, but ExampleSTAGTests do look command after goto
@@ -170,7 +171,6 @@ public class STAGCommand {
         String healthNumber = String.valueOf(currentHealth);
         return "Your current health level is " + healthNumber;
     }
-
 
     //this method assumes that there is only one destination in command -  to do: guard against there being two
     private boolean commandIncludesDestinationThatExists(){
@@ -273,7 +273,6 @@ public class STAGCommand {
         return currentGameAction.getNarration();
     }
 
-    //important: handle consuming locations
     private void consumeEntities() {
         ArrayList<Consumable> consumableEntities = currentGameAction.getConsumableEntities();
         Artefact droppedArtefact;

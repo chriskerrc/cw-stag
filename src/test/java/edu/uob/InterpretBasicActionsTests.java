@@ -5,21 +5,11 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.io.IOException;
 import java.io.File;
-import java.util.HashSet;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import org.xml.sax.SAXException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class InterpretBuiltInActionsTests {
+public class InterpretBasicActionsTests {
 
     private GameServer server;
 
@@ -72,6 +62,21 @@ public class InterpretBuiltInActionsTests {
         sendCommandToServer("simon: get axe");
         sendCommandToServer("simon: goto forest");
         String response = sendCommandToServer("simon: chop tree");
+        //check narration
+        assertEquals(response, "You cut down the tree with the axe");
+        response = sendCommandToServer("simon: look");
+        //check that tree is gone from forest
+        assertFalse(response.contains("tree"));
+        //check that the log has appeared in the forest
+        assertTrue(response.contains("A heavy wooden log"));
+    }
+
+    @Test
+    void testInterpretChopTreeTwoTriggers() {
+        sendCommandToServer("simon: get axe");
+        sendCommandToServer("simon: goto forest");
+        //two trigger words
+        String response = sendCommandToServer("simon: cut chop tree");
         //check narration
         assertEquals(response, "You cut down the tree with the axe");
         response = sendCommandToServer("simon: look");

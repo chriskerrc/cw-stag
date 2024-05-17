@@ -118,9 +118,6 @@ public class GameModel {
         }
     }
 
-    //the HashMap<Location,Location> assumes each location will only have one destination
-    //this is OK for basic entities but will need to be refactored for extended entities
-    //for example, forest has both cabin and riverbank as destinations
     private void storePaths(ArrayList<Graph> graphSections){
         ArrayList<Edge> paths = graphSections.get(1).getEdges();
         for(Edge edge : paths){
@@ -130,7 +127,13 @@ public class GameModel {
             Node toLocation = edge.getTarget().getNode();
             String toName = toLocation.getId().getId();
             Location endLocation = getLocationFromName(toName);
-            HashSet<Location> locationHashSet = new HashSet<>();
+            HashSet<Location> locationHashSet;
+            if(pathsMap.containsKey(fromName)){
+                locationHashSet = pathsMap.get(fromName);
+            }
+            else{
+                locationHashSet = new HashSet<>();
+            }
             locationHashSet.add(endLocation);
             pathsMap.put(startLocation.getName(),locationHashSet);
         }
