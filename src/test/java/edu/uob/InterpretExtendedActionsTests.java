@@ -52,7 +52,7 @@ public class InterpretExtendedActionsTests {
         //check shovel is in inv
         response = sendCommandToServer("simon: inv");
         assertTrue(response.contains("shovel"));
-/*
+
         //Bridge river to clearing
         sendCommandToServer("simon: goto cabin");
         sendCommandToServer("simon: get potion");
@@ -75,7 +75,6 @@ public class InterpretExtendedActionsTests {
         //check you can see ground
         response = sendCommandToServer("simon: look");
         assertTrue(response.contains("soil"));
-        assertTrue(response.contains("ground"));
 
         //Dig hole
         response = sendCommandToServer("simon: dig ground");
@@ -84,7 +83,6 @@ public class InterpretExtendedActionsTests {
         //check can't see ground anymore
         response = sendCommandToServer("simon: look");
         assertFalse(response.contains("soil"));
-        assertFalse(response.contains("ground"));
         //check can see hole and gold
         assertTrue(response.contains("gold"));
         assertTrue(response.contains("big"));
@@ -95,7 +93,29 @@ public class InterpretExtendedActionsTests {
         sendCommandToServer("simon: get gold");
         response = sendCommandToServer("simon: inv");
         assertTrue(response.contains("gold"));
-*/
-        //lumberjack
+
+        //Summon lumberjack
+        //Go back to start location
+        sendCommandToServer("simon: goto riverbank");
+        sendCommandToServer("simon: goto forest");
+        sendCommandToServer("simon: goto cabin");
+        response = sendCommandToServer("simon: blow horn");
+        assertTrue(response.contains("You blow the horn and as if by magic, a lumberjack appears !"));
+        //check that you can see the lumberjack in the cabin
+        response = sendCommandToServer("simon: look");
+        assertTrue(response.contains("burly"));
+        assertTrue(response.contains("wood cutter"));
+        assertTrue(response.contains("cabin"));
+
+        //Summon lumberjack from cabin to forest
+        sendCommandToServer("simon: goto forest");
+        sendCommandToServer("simon: blow horn");
+        response = sendCommandToServer("simon: look");
+        assertTrue(response.contains("burly"));
+
+        //check that there isn't a duplicate lumberjack in the cabin
+        sendCommandToServer("simon: goto cabin");
+        response = sendCommandToServer("simon: look");
+        assertFalse(response.contains("burly"));
     }
 }

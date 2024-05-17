@@ -222,7 +222,6 @@ public class GameModel {
         }
         Element narration = (Element)actionElement.getElementsByTagName("narration").item(0);
         gameAction.setNarration(narration.getTextContent());
-        //for each keyphrase, add hashset of gameActions
         Element triggers = (Element)actionElement.getElementsByTagName("triggers").item(0);
         NodeList triggersNodeList = triggers.getElementsByTagName("keyphrase");
         for(int i = 0; i < triggersNodeList.getLength(); i++){
@@ -255,11 +254,16 @@ public class GameModel {
         }
     }
 
-    public GameEntity entityIsInStoreroom (String entityName) {
+
+
+    public GameEntity getEntityFromItsCurrentLocation (String entityName) {
         for (Location location : locationsList) {
-            if (Objects.equals(location.getName(), "storeroom")) {
-                return location.getEntityFromName(entityName);
+            GameEntity movedEntity = location.getEntityFromName(entityName);
+            if(movedEntity != null){
+                location.removeEntity(entityName);
+                return movedEntity;
             }
+
         }
         return null;
     }

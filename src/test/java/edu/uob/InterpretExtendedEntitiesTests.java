@@ -27,13 +27,6 @@ public class InterpretExtendedEntitiesTests {
     }
 
     @Test
-    void testStoreExtendedLocations() {
-
-        //check you can go from cabin to forest to cabin
-
-    }
-
-    @Test
     void testTraversePathsAndLook() {
         String response =  sendCommandToServer("simon: look");
         //check can see coin in cabin

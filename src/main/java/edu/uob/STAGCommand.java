@@ -300,10 +300,9 @@ public class STAGCommand {
 
     private void produceEntities(){
         ArrayList<Product> producedEntities = currentGameAction.getProducedEntities();
-        //assuming produced entities are always in the storeroom for now (they might not be)
         for (Product product : producedEntities) {
             String productName = product.getName();
-            GameEntity gameEntity = gameModel.entityIsInStoreroom(productName);
+            GameEntity gameEntity = gameModel.getEntityFromItsCurrentLocation(productName);
             Location producedLocation = gameModel.getLocationFromName(productName);
             if(gameEntity != null){
                 currentLocation.addEntity(gameEntity);
