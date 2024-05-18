@@ -9,15 +9,10 @@ public class STAGCommand {
     private final ArrayList<String> commandTokens;
     private final GameModel gameModel;
     private String currentPlayerName;
-
     private Player currentPlayerObject;
-
     private String matchingDestinationName;
-
     private String matchingArtefactName;
-
     private Location currentLocation;
-
     private GameAction currentGameAction;
 
     public STAGCommand(ArrayList<String> commandTokens, GameModel gameModel) {
@@ -27,29 +22,29 @@ public class STAGCommand {
 
     public String interpretSTAGCommand(){
         String commandResponse = "Command not recognised";
-        if(!isPlayerNameValid()){
+        if(!isPlayerNameSet()){
             return "Enter a valid player name";
         }
         setUpPlayer();
         currentLocation = currentPlayerObject.getCurrentLocation();
         boolean actionExecuted = false;
         for(String commandToken : commandTokens){
-            if(commandToken.toLowerCase().contains("look")){
+            if(commandToken.contains("look")){
                 commandResponse = interpretLookCommand();
             }
-            if(commandToken.toLowerCase().contains("goto")){
+            if(commandToken.contains("goto")){
                 commandResponse = interpretGotoCommand();
             }
-            if(commandToken.toLowerCase().contains("get")){
+            if(commandToken.contains("get")){
                 commandResponse = interpretGetCommand();
             }
-            if(commandToken.toLowerCase().contains("inv") || commandToken.toLowerCase().contains("inventory")){
+            if(commandToken.contains("inv") || commandToken.contains("inventory")){
                 commandResponse = interpretInvCommand();
             }
-            if(commandToken.toLowerCase().contains("drop")){
+            if(commandToken.contains("drop")){
                 commandResponse = interpretDropCommand();
             }
-            if(commandToken.toLowerCase().contains("health")){
+            if(commandToken.contains("health")){
                 commandResponse = interpretHealthCommand();
             }
             if(actionCommandIsValid() && !actionExecuted){
@@ -74,7 +69,7 @@ public class STAGCommand {
         }
     }
 
-    private boolean isPlayerNameValid(){
+    private boolean isPlayerNameSet(){
         String potentialPlayerName = commandTokens.get(0);
         if(isPlayerNameValid(potentialPlayerName)) {
             currentPlayerName = potentialPlayerName;
@@ -84,6 +79,7 @@ public class STAGCommand {
     }
 
     private boolean isPlayerNameValid(String playerName){
+        //player name can only contain alpha, space, apostrophe or hyphen characters
         return playerName.matches("^[a-zA-Z '-]+$");
     }
 
@@ -95,7 +91,7 @@ public class STAGCommand {
     private String interpretLookCommand(){
         String currentLocationDescription = currentLocation.getDescription();
         StringBuilder responseBuilder = new StringBuilder();
-        responseBuilder.append("You are in ").append(currentLocationDescription).append(". You can see:\n"); //does newline char work on all OSes?
+        responseBuilder.append("You are in ").append(currentLocationDescription).append(". You can see:\n");
         for (GameEntity gameEntity : currentLocation.getEntityList()) {
             responseBuilder.append(gameEntity.getDescription()).append("\n");
         }
@@ -105,19 +101,19 @@ public class STAGCommand {
             }
         }
         responseBuilder.append("You can access from here: \n");
-        HashSet<Location> destinations = gameModel.getDestinationsFromLocation(currentLocation.getName());
-        for(Location location : destinations){
-            responseBuilder.append(location.getName()).append("\n");
+        HashSet<Location> destinationsSet = gameModel.getDestinationsFromLocation(currentLocation.getName());
+        for(Location locationDestination : destinationsSet){
+            responseBuilder.append(locationDestination.getName()).append("\n");
         }
         return responseBuilder.toString();
     }
 
     private String interpretGotoCommand(){
-        if(!commandIncludesDestinationThatExists()){
+        if(!checkDestinationIsValid()){
             return "Did you provide a location to go to?";
         }
-        HashSet<Location> destinations = gameModel.getDestinationsFromLocation(currentLocation.getName());
-        for(Location potentialDestination : destinations){
+        HashSet<Location> destinationsSet = gameModel.getDestinationsFromLocation(currentLocation.getName());
+        for(Location potentialDestination : destinationsSet){
             if(Objects.equals(potentialDestination.getName(), matchingDestinationName)){
                 gameModel.updatePlayerLocation(currentPlayerName, potentialDestination);
                 return "You went to the " + potentialDestination.getName();
@@ -126,12 +122,11 @@ public class STAGCommand {
             return "You can't get there from here";
     }
 
-    //assumes only one artefact in command for now
     private String interpretGetCommand(){
-        if(!commandIncludesArtefactInRoom(currentLocation)){
+        if(!commandHasArtefactInRoom(currentLocation)){
             return "That artefact isn't in this location";
         }
-        Artefact pickedUpArtefact = (Artefact) currentLocation.removeEntity(matchingArtefactName); //is it dangerous to cast like this?
+        Artefact pickedUpArtefact = (Artefact) currentLocation.removeEntity(matchingArtefactName);
         currentPlayerObject.addArtefactToInventory(pickedUpArtefact);
         return "You picked up " + matchingArtefactName;
     }
@@ -142,7 +137,7 @@ public class STAGCommand {
         if(possibleArtefact == null){
             return "You don't have that artefact or it doesn't exist";
         }
-        currentPlayerObject.dropArtefactFromInventory(possibleArtefact.getName());
+        currentPlayerObject.dropArtefact(possibleArtefact.getName());
         currentLocation.addEntity(possibleArtefact);
         return "You dropped " + matchingArtefactName;
     }
@@ -164,7 +159,7 @@ public class STAGCommand {
         return "Your current health level is " + healthNumber;
     }
 
-    private boolean commandIncludesDestinationThatExists(){
+    private boolean checkDestinationIsValid(){
         for(String token: commandTokens){
             Location location = gameModel.getLocationFromName(token);
             if(location != null && Objects.equals(gameModel.getLocationFromName(token).getName(), token)){
@@ -175,14 +170,14 @@ public class STAGCommand {
         return false;
     }
 
-    private boolean commandIncludesArtefactInRoom(Location currentLocation){
+    private boolean commandHasArtefactInRoom(Location currentLocation){
         if(currentLocation.isNoArtefact()){
             return false;
         }
         for(String token: commandTokens){
-            Artefact artefact = (Artefact) currentLocation.getEntityFromName(token);
-            if(artefact != null && Objects.equals(artefact.getName(), token)){
-                matchingArtefactName = artefact.getName();
+            Artefact artefactInRoom = (Artefact) currentLocation.getEntityFromName(token);
+            if(artefactInRoom != null && Objects.equals(artefactInRoom.getName(), token)){
+                matchingArtefactName = artefactInRoom.getName();
                 return true;
             }
         }
@@ -195,11 +190,11 @@ public class STAGCommand {
             return null;
         }
         //too deeply nested
-        for(String token: commandTokens){
-            for(Artefact artefact : inventoryList){
-                if(Objects.equals(artefact.getName(), token)){
-                    matchingArtefactName = artefact.getName();
-                    return artefact;
+        for(String commandToken: commandTokens){
+            for(Artefact inventoryArtefact : inventoryList){
+                if(Objects.equals(inventoryArtefact.getName(), commandToken)){
+                    matchingArtefactName = inventoryArtefact.getName();
+                    return inventoryArtefact;
                 }
             }
 
@@ -208,11 +203,11 @@ public class STAGCommand {
     }
 
     private boolean actionCommandIsValid(){
-        HashSet<GameAction> gameActionHashSet = commandContainsKeyPhrase();
-        if(gameActionHashSet == null){
+        HashSet<GameAction> gameActionSet = commandContainsKeyPhrase();
+        if(gameActionSet == null){
             return false;
         }
-        GameAction gameAction = findGameActionMatchingSubject(gameActionHashSet);
+        GameAction gameAction = getGameActionMatchingSubject(gameActionSet);
         if(gameAction == null){
             return false;
         }
@@ -231,7 +226,7 @@ public class STAGCommand {
     }
 
     //check if hashset contains subject
-    private GameAction findGameActionMatchingSubject(HashSet<GameAction> gameActionHashSet){
+    private GameAction getGameActionMatchingSubject(HashSet<GameAction> gameActionHashSet){
         for(GameAction gameAction: gameActionHashSet){
             return isSubjectInCommand(gameAction);
         }
@@ -252,11 +247,11 @@ public class STAGCommand {
         ArrayList<Subject> subjectList = gameAction.getSubjectList();
         int matchingSubjects = 0;
         Location currentLocation = currentPlayerObject.getCurrentLocation();
-        for(Subject subject: subjectList){
-            if(currentPlayerObject.subjectIsInInventory(subject.getName())){
+        for(Subject subjectEntity: subjectList){
+            if(currentPlayerObject.subjectIsInInventory(subjectEntity.getName())){
                 matchingSubjects++;
             }
-            if(currentLocation.subjectIsInLocation(subject.getName())){
+            if(currentLocation.isSubjectInLocation(subjectEntity.getName())){
                 matchingSubjects++;
             }
         }
@@ -273,14 +268,14 @@ public class STAGCommand {
         ArrayList<Consumable> consumableEntities = currentGameAction.getConsumableEntities();
         Artefact droppedArtefact;
         GameEntity consumedGameEntity;
-        for (Consumable consumable : consumableEntities) {
-            String consumableName = consumable.getName();
+        for (Consumable consumableEntity : consumableEntities) {
+            String consumableName = consumableEntity.getName();
             Location consumedLocation = gameModel.getLocationFromName(consumableName);
             if (currentPlayerObject.subjectIsInInventory(consumableName)) {
-                droppedArtefact = currentPlayerObject.dropArtefactFromInventory(consumableName);
+                droppedArtefact = currentPlayerObject.dropArtefact(consumableName);
                 gameModel.addEntityToLocation("storeroom", droppedArtefact);
             }
-            if(currentLocation.subjectIsInLocation(consumableName)){
+            if(currentLocation.isSubjectInLocation(consumableName)){
                 consumedGameEntity = currentLocation.getEntityFromName(consumableName);
                 currentLocation.removeEntity(consumableName);
                 gameModel.addEntityToLocation("storeroom", consumedGameEntity);
@@ -296,8 +291,8 @@ public class STAGCommand {
 
     private void produceEntities(){
         ArrayList<Product> producedEntities = currentGameAction.getProducedEntities();
-        for (Product product : producedEntities) {
-            String productName = product.getName();
+        for (Product productEntity : producedEntities) {
+            String productName = productEntity.getName();
             GameEntity gameEntity = gameModel.getEntityFromItsCurrentLocation(productName);
             Location producedLocation = gameModel.getLocationFromName(productName);
             if(gameEntity != null){

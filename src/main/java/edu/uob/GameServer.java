@@ -113,8 +113,8 @@ public final class GameServer {
             Document actionsDocument = gameModel.parseActions();
             gameModel.storeActions(actionsDocument);
             }
-        catch (IOException | ParseException | ParserConfigurationException | SAXException e) {
-           throw new RuntimeException("Error setting up gameModel: " + e.getMessage(), e);
+        catch (IOException | ParseException | ParserConfigurationException | SAXException setupException) {
+           throw new RuntimeException("Setup error: " + setupException.getMessage(), setupException);
         }
     }
 

@@ -70,7 +70,6 @@ public class GameModel {
         storePaths(graphSections);
     }
 
-    //maybe simplify this method
     private void processLocationObjects(Graph graphLocation, Location gameLocation){
         ArrayList<Graph> subGraphs = graphLocation.getSubgraphs();
         ArrayList<Node> objectNodes;
@@ -90,7 +89,6 @@ public class GameModel {
         }
     }
 
-    //maybe simplify this method
     private void storeObjects(ArrayList<Node> objectNodes, Location gameLocation, String objectType){
         String objectName;
         String objectDescription;
@@ -197,7 +195,7 @@ public class GameModel {
         NodeList subjectsNodeList = actionSubjects.getElementsByTagName("entity");
         for(int i = 0; i < subjectsNodeList.getLength(); i++){
             String subjectName = subjectsNodeList.item(i).getTextContent();
-            Subject actionSubject = new Subject(subjectName, null);
+            Subject actionSubject = new Subject(subjectName);
             gameAction.addSubjectEntity(actionSubject);
         }
         Element actionProducts = (Element)actionElement.getElementsByTagName("produced").item(0);
@@ -205,7 +203,7 @@ public class GameModel {
         if(productsNodeList.getLength() > 0){
             for(int i = 0; i < productsNodeList.getLength(); i++){
                 String productName = productsNodeList.item(i).getTextContent();
-                Product actionProduct = new Product(productName, null);
+                Product actionProduct = new Product(productName);
                 gameAction.addProductEntity(actionProduct);
             }
         }
