@@ -114,13 +114,12 @@ public class STAGCommand {
 
     private String interpretGotoCommand(){
         if(!commandIncludesDestinationThatExists()){
-            return "Did you provide a location to goto?";
+            return "Did you provide a location to go to?";
         }
         HashSet<Location> destinations = gameModel.getDestinationsFromLocation(currentLocation.getName());
         for(Location potentialDestination : destinations){
             if(Objects.equals(potentialDestination.getName(), matchingDestinationName)){
                 gameModel.updatePlayerLocation(currentPlayerName, potentialDestination);
-                //not sure if i need to automatically do look command: example video seems to suggest so, but ExampleSTAGTests do look command after goto
                 return "You went to the " + potentialDestination.getName();
             }
         }
@@ -165,7 +164,6 @@ public class STAGCommand {
         return "Your current health level is " + healthNumber;
     }
 
-    //this method assumes that there is only one destination in command -  to do: guard against there being two
     private boolean commandIncludesDestinationThatExists(){
         for(String token: commandTokens){
             Location location = gameModel.getLocationFromName(token);
