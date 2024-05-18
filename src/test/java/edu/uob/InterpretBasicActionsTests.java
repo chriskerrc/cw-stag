@@ -115,6 +115,21 @@ public class InterpretBasicActionsTests {
     }
 
     @Test
+    void testInterpretChopTreeDecoratedCommand() {
+        sendCommandToServer("simon: get axe");
+        sendCommandToServer("simon: goto forest");
+        //decorated command
+        String response = sendCommandToServer("simon: please chop the tree using the axe");
+        //check narration
+        assertEquals(response, "You cut down the tree with the axe");
+        response = sendCommandToServer("simon: look");
+        //check that tree is gone from forest
+        assertFalse(response.contains("tree"));
+        //check that the log has appeared in the forest
+        assertTrue(response.contains("A heavy wooden log"));
+    }
+
+    @Test
     void testInterpretDrinkPotionFromLocation() {
         String response = sendCommandToServer("simon: look");
         assertTrue(response.contains("potion"));
@@ -232,13 +247,132 @@ public class InterpretBasicActionsTests {
         assertTrue(response.contains("chris"));
         assertTrue(response.contains("joe"));
         assertFalse(response.contains("simon"));
-        System.out.println(response);
         //check Chris can see Joe and Simon in cabin, but not himself
         response = sendCommandToServer("chris: look");
         assertTrue(response.contains("player"));
         assertFalse(response.contains("chris"));
         assertTrue(response.contains("joe"));
         assertTrue(response.contains("simon"));
+    }
+
+    @Test
+    void testUppercaseCommands() {
+        //all uppercase
+        String response = sendCommandToServer("simon: LOOK");
+        assertTrue(response.contains("cabin"));
+        //mixed case
+        response = sendCommandToServer("simon: lOoK");
+        assertTrue(response.contains("cabin"));
+        //mixed case attribute
+        sendCommandToServer("simon: gEt aXE");
+        response = sendCommandToServer("simon: iNV");
+        assertTrue(response.contains("axe"));
+    }
+
+    @Test
+    void testCommandsWithPunctuation() {
+        //exclamation mark
+        String response = sendCommandToServer("simon: look!");
+        assertTrue(response.contains("cabin"));
+        //full stop and question mark
+        sendCommandToServer("simon: get axe.");
+        response = sendCommandToServer("simon: inv?");
+        assertTrue(response.contains("axe"));
+        response = sendCommandToServer("simon: inv.");
+        assertTrue(response.contains("axe"));
+        //commas
+        sendCommandToServer("simon: get, , , , axe");
+        response = sendCommandToServer("simon: ,inv,");
+        assertTrue(response.contains("axe"));
+    }
+
+    @Test
+    void testCommandsWithMultipleSpaces() {
+        //built-in command
+        String response = sendCommandToServer("simon:      look");
+        assertTrue(response.contains("cabin"));
+        //spaces between built in command and attribute
+        sendCommandToServer("simon: get    axe");
+        response = sendCommandToServer("simon: inv");
+        assertTrue(response.contains("axe"));
+    }
+
+    @Test
+    void testCommandsWithMissingColon() {
+        //missing colon means command is rejected
+        String response = sendCommandToServer("simon look");
+        assertTrue(response.contains("missing"));
+        //missing colon means command is not interpreted
+        sendCommandToServer("simon get axe");
+        response = sendCommandToServer("simon: inv");
+        assertFalse(response.contains("axe"));
+    }
+
+    @Test
+    void testValidPlayerNames() {
+        //Valid names
+        //all lowercase player name
+        String response = sendCommandToServer("simon: look");
+        assertTrue(response.contains("cabin"));
+        //leading uppercase player name resisters successfully
+        response = sendCommandToServer("Chris: look");
+        assertTrue(response.contains("cabin"));
+        sendCommandToServer("JULIA: look");
+        response = sendCommandToServer("Fred: look");
+        assertTrue(response.contains("Chris"));
+        assertTrue(response.contains("JULIA"));
+        //name with hyphen
+        sendCommandToServer("Amy-Rose: look");
+        response = sendCommandToServer("Fred: look");
+        assertTrue(response.contains("Amy-Rose"));
+        //name with apostrophe
+        sendCommandToServer("D'Lisa: look");
+        response = sendCommandToServer("Fred: look");
+        assertTrue(response.contains("D'Lisa"));
+        //name with space
+        sendCommandToServer("Sir Andrew Barron Murray: look");
+        response = sendCommandToServer("Fred: look");
+        assertTrue(response.contains("Sir Andrew Barron Murray"));
+        //check that name with multiple spaces treated as a single player
+        sendCommandToServer("Sir Andrew Barron Murray: get axe");
+        //check that axe disappears for fred
+        response = sendCommandToServer("Fred: look");
+        assertFalse(response.contains("axe"));
+        //check leading spaces stripped from player name
+        sendCommandToServer("     Fred: get potion");
+        response = sendCommandToServer("Fred: inv");
+        assertTrue(response.contains("potion"));
+
+        //Invalid names
+        //Check name with number is rejected
+        response = sendCommandToServer("Fr3d: look");
+        assertTrue(response.contains("valid"));
+        assertTrue(response.contains("name"));
+        //Check name with weird punctuation is rejected
+        response = sendCommandToServer("Fr_d: look");
+        assertTrue(response.contains("valid"));
+        assertTrue(response.contains("name"));
+    }
+
+    @Test
+    void testCommandsAppliedToCorrectPlayer() {
+        sendCommandToServer("simon: look");
+        sendCommandToServer("chris: look");
+        //check Chris is still in cabin
+        sendCommandToServer("simon: goto forest");
+        String response = sendCommandToServer("simon: look");
+        assertTrue(response.contains("tree"));
+        response = sendCommandToServer("chris: look");
+        assertTrue(response.contains("potion"));
+        //check players have different inventories
+        sendCommandToServer("simon: get key");
+        sendCommandToServer("chris: get potion");
+        response = sendCommandToServer("simon: inv");
+        assertTrue(response.contains("key"));
+        assertFalse(response.contains("potion"));
+        response = sendCommandToServer("chris: inv");
+        assertTrue(response.contains("potion"));
+        assertFalse(response.contains("key"));
     }
 
 

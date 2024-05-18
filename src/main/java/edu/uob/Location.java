@@ -7,8 +7,8 @@ public class Location extends GameEntity {
 
     ArrayList<GameEntity> entityList = new ArrayList<>();
 
-    public Location(String name, String description) {
-        super(name, description);
+    public Location(String locationName, String locationDescription) {
+        super(locationName, locationDescription);
     }
 
     //add paths to locations
@@ -58,7 +58,6 @@ public class Location extends GameEntity {
         return true;
     }
 
-    //think about matching by case e.g. "key and "kEY"
     public GameEntity removeEntity(String entityName){
         for(GameEntity gameEntity : entityList){
             if(Objects.equals(gameEntity.getName(), entityName)){
@@ -69,7 +68,7 @@ public class Location extends GameEntity {
         return null;
     }
 
-    public boolean subjectIsInLocation(String subjectName){
+    public boolean isSubjectInLocation(String subjectName){
         for (GameEntity gameEntity : entityList) {
             if (Objects.equals(gameEntity.getName(), subjectName)) {
                 return true;
@@ -77,7 +76,5 @@ public class Location extends GameEntity {
         }
         return false;
     }
-
-
 
 }

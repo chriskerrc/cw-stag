@@ -6,26 +6,22 @@ import java.util.Objects;
 public class Player {
 
     private Location currentLocation;
-
-    private GameModel gameModel;
-
-    private String name;
-
+    private final GameModel gameModel;
+    private final String playerName;
     private int playerHealth;
+    private final ArrayList<Artefact> inventoryList = new ArrayList<>();
+    private final int maximumHealth = 3;
 
-    private ArrayList<Artefact> inventoryList = new ArrayList<>();
-
-
-    public Player(GameModel gameModel, String name){
+    public Player(GameModel gameModel, String playerName){
         this.gameModel = gameModel;
         this.currentLocation = gameModel.getStartLocation();
-        this.name = name;
-        playerHealth = 3;
+        this.playerName = playerName;
+        playerHealth = maximumHealth;
     }
 
     public String getName()
     {
-        return name;
+        return playerName;
     }
 
     public Location getCurrentLocation(){
@@ -40,11 +36,11 @@ public class Player {
         inventoryList.add(pickedUpArtefact);
     }
 
-    public Artefact dropArtefactFromInventory(String artefactName){
-        for(Artefact artefact : inventoryList){
-            if(Objects.equals(artefact.getName(), artefactName)){
-                inventoryList.remove(artefact);
-                return artefact;
+    public Artefact dropArtefact(String artefactName){
+        for(Artefact inventoryArtefact : inventoryList){
+            if(Objects.equals(inventoryArtefact.getName(), artefactName)){
+                inventoryList.remove(inventoryArtefact);
+                return inventoryArtefact;
             }
         }
         return null;
@@ -58,9 +54,9 @@ public class Player {
 
     private void emptyInventory(){
         ArrayList<Artefact> artefactsToDrop = new ArrayList<>(inventoryList);
-        for(Artefact artefact : artefactsToDrop){
-            inventoryList.remove(artefact);
-            gameModel.addEntityToLocation(currentLocation.getName(), artefact);
+        for(Artefact inventoryArtefact : artefactsToDrop){
+            inventoryList.remove(inventoryArtefact);
+            gameModel.addEntityToLocation(currentLocation.getName(), inventoryArtefact);
         }
     }
 
@@ -69,18 +65,16 @@ public class Player {
     }
 
     private void resetPlayerHealth(){
-        playerHealth = 3;
+        playerHealth = maximumHealth;
     }
-
-
 
     public ArrayList<Artefact> getInventoryList(){
         return inventoryList;
     }
 
     public boolean subjectIsInInventory(String subjectName){
-        for (Artefact artefact : inventoryList){
-            if(Objects.equals(artefact.getName(), subjectName)){
+        for (Artefact inventoryArtefact : inventoryList){
+            if(Objects.equals(inventoryArtefact.getName(), subjectName)){
                 return true;
             }
         }
@@ -88,7 +82,7 @@ public class Player {
     }
 
     public void increasePlayerHealth(){
-        if(playerHealth < 3){
+        if(playerHealth < maximumHealth){
             playerHealth++;
         }
     }
@@ -102,7 +96,5 @@ public class Player {
     public int getPlayerHealth(){
         return playerHealth;
     }
-
-
 
 }

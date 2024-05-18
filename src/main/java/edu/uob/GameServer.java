@@ -48,10 +48,17 @@ public final class GameServer {
     * @param command The incoming command to be processed
     */
     public String handleCommand(String command) {
-        Tokenizer commandTokenizer = new Tokenizer(command);
-        ArrayList<String> commandTokens = commandTokenizer.tokenizeCommand();
-        STAGCommand stagCommand = new STAGCommand(commandTokens, gameModel);
-        return stagCommand.interpretSTAGCommand();
+        try {
+            Tokenizer commandTokenizer = new Tokenizer(command);
+            ArrayList<String> commandTokens = commandTokenizer.tokenizeCommand();
+            if (commandTokens == null) {
+                return "Invalid command: missing colon before name?";
+            }
+            STAGCommand stagCommand = new STAGCommand(commandTokens, gameModel);
+            return stagCommand.interpretSTAGCommand();
+        } catch (Throwable throwableException) {
+            return "Failed to interpret command";
+        }
     }
 
     /**
@@ -106,8 +113,8 @@ public final class GameServer {
             Document actionsDocument = gameModel.parseActions();
             gameModel.storeActions(actionsDocument);
             }
-        catch (IOException | ParseException | ParserConfigurationException | SAXException e) {
-           throw new RuntimeException("Error setting up gameModel: " + e.getMessage(), e);
+        catch (IOException | ParseException | ParserConfigurationException | SAXException setupException) {
+           throw new RuntimeException("Setup error: " + setupException.getMessage(), setupException);
         }
     }
 
