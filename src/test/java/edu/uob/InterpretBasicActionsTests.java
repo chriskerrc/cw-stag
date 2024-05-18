@@ -115,6 +115,21 @@ public class InterpretBasicActionsTests {
     }
 
     @Test
+    void testInterpretChopTreeDecoratedCommand() {
+        sendCommandToServer("simon: get axe");
+        sendCommandToServer("simon: goto forest");
+        //decorated command
+        String response = sendCommandToServer("simon: please chop the tree using the axe");
+        //check narration
+        assertEquals(response, "You cut down the tree with the axe");
+        response = sendCommandToServer("simon: look");
+        //check that tree is gone from forest
+        assertFalse(response.contains("tree"));
+        //check that the log has appeared in the forest
+        assertTrue(response.contains("A heavy wooden log"));
+    }
+
+    @Test
     void testInterpretDrinkPotionFromLocation() {
         String response = sendCommandToServer("simon: look");
         assertTrue(response.contains("potion"));
@@ -232,7 +247,6 @@ public class InterpretBasicActionsTests {
         assertTrue(response.contains("chris"));
         assertTrue(response.contains("joe"));
         assertFalse(response.contains("simon"));
-        System.out.println(response);
         //check Chris can see Joe and Simon in cabin, but not himself
         response = sendCommandToServer("chris: look");
         assertTrue(response.contains("player"));
@@ -338,6 +352,27 @@ public class InterpretBasicActionsTests {
         response = sendCommandToServer("Fr_d: look");
         assertTrue(response.contains("valid"));
         assertTrue(response.contains("name"));
+    }
+
+    @Test
+    void testCommandsAppliedToCorrectPlayer() {
+        sendCommandToServer("simon: look");
+        sendCommandToServer("chris: look");
+        //check Chris is still in cabin
+        sendCommandToServer("simon: goto forest");
+        String response = sendCommandToServer("simon: look");
+        assertTrue(response.contains("tree"));
+        response = sendCommandToServer("chris: look");
+        assertTrue(response.contains("potion"));
+        //check players have different inventories
+        sendCommandToServer("simon: get key");
+        sendCommandToServer("chris: get potion");
+        response = sendCommandToServer("simon: inv");
+        assertTrue(response.contains("key"));
+        assertFalse(response.contains("potion"));
+        response = sendCommandToServer("chris: inv");
+        assertTrue(response.contains("potion"));
+        assertFalse(response.contains("key"));
     }
 
 

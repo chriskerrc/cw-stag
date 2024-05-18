@@ -48,13 +48,17 @@ public final class GameServer {
     * @param command The incoming command to be processed
     */
     public String handleCommand(String command) {
-        Tokenizer commandTokenizer = new Tokenizer(command);
-        ArrayList<String> commandTokens = commandTokenizer.tokenizeCommand();
-        if(commandTokens == null){
-            return "Invalid command: missing colon after name?";
+        try {
+            Tokenizer commandTokenizer = new Tokenizer(command);
+            ArrayList<String> commandTokens = commandTokenizer.tokenizeCommand();
+            if (commandTokens == null) {
+                return "Invalid command: missing colon after name?";
+            }
+            STAGCommand stagCommand = new STAGCommand(commandTokens, gameModel);
+            return stagCommand.interpretSTAGCommand();
+        } catch (Throwable throwableException) {
+            return "Failed to interpret command";
         }
-        STAGCommand stagCommand = new STAGCommand(commandTokens, gameModel);
-        return stagCommand.interpretSTAGCommand();
     }
 
     /**
