@@ -241,6 +241,48 @@ public class InterpretBasicActionsTests {
         assertTrue(response.contains("simon"));
     }
 
+    @Test
+    void testUppercaseCommands() {
+        //all uppercase
+        String response = sendCommandToServer("simon: LOOK");
+        assertTrue(response.contains("cabin"));
+        //mixed case
+        response = sendCommandToServer("simon: lOoK");
+        assertTrue(response.contains("cabin"));
+        //mixed case attribute
+        sendCommandToServer("simon: gEt aXE");
+        response = sendCommandToServer("simon: iNV");
+        assertTrue(response.contains("axe"));
+    }
+
+    @Test
+    void testCommandsWithPunctuation() {
+        //exclamation mark
+        String response = sendCommandToServer("simon: look!");
+        assertTrue(response.contains("cabin"));
+        //full stop and question mark
+        sendCommandToServer("simon: get axe.");
+        response = sendCommandToServer("simon: inv?");
+        assertTrue(response.contains("axe"));
+        response = sendCommandToServer("simon: inv.");
+        assertTrue(response.contains("axe"));
+        //commas
+        sendCommandToServer("simon: get, , , , axe");
+        response = sendCommandToServer("simon: ,inv,");
+        assertTrue(response.contains("axe"));
+    }
+
+    @Test
+    void testCommandsWithMultipleSpaces() {
+        //built-in command
+        String response = sendCommandToServer("simon:      look");
+        assertTrue(response.contains("cabin"));
+        //spaces between built in command and attribute
+        sendCommandToServer("simon: get    axe");
+        response = sendCommandToServer("simon: inv");
+        assertTrue(response.contains("axe"));
+    }
+
 
 
 
