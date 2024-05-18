@@ -283,6 +283,63 @@ public class InterpretBasicActionsTests {
         assertTrue(response.contains("axe"));
     }
 
+    @Test
+    void testCommandsWithMissingColon() {
+        //missing colon means command is rejected
+        String response = sendCommandToServer("simon look");
+        assertTrue(response.contains("missing"));
+        //missing colon means command is not interpreted
+        sendCommandToServer("simon get axe");
+        response = sendCommandToServer("simon: inv");
+        assertFalse(response.contains("axe"));
+    }
+
+    @Test
+    void testValidPlayerNames() {
+        //Valid names
+        //all lowercase player name
+        String response = sendCommandToServer("simon: look");
+        assertTrue(response.contains("cabin"));
+        //leading uppercase player name resisters successfully
+        response = sendCommandToServer("Chris: look");
+        assertTrue(response.contains("cabin"));
+        sendCommandToServer("JULIA: look");
+        response = sendCommandToServer("Fred: look");
+        assertTrue(response.contains("Chris"));
+        assertTrue(response.contains("JULIA"));
+        //name with hyphen
+        sendCommandToServer("Amy-Rose: look");
+        response = sendCommandToServer("Fred: look");
+        assertTrue(response.contains("Amy-Rose"));
+        //name with apostrophe
+        sendCommandToServer("D'Lisa: look");
+        response = sendCommandToServer("Fred: look");
+        assertTrue(response.contains("D'Lisa"));
+        //name with space
+        sendCommandToServer("Sir Andrew Barron Murray: look");
+        response = sendCommandToServer("Fred: look");
+        assertTrue(response.contains("Sir Andrew Barron Murray"));
+        //check that name with multiple spaces treated as a single player
+        sendCommandToServer("Sir Andrew Barron Murray: get axe");
+        //check that axe disappears for fred
+        response = sendCommandToServer("Fred: look");
+        assertFalse(response.contains("axe"));
+        //check leading spaces stripped from player name
+        sendCommandToServer("     Fred: get potion");
+        response = sendCommandToServer("Fred: inv");
+        assertTrue(response.contains("potion"));
+
+        //Invalid names
+        //Check name with number is rejected
+        response = sendCommandToServer("Fr3d: look");
+        assertTrue(response.contains("valid"));
+        assertTrue(response.contains("name"));
+        //Check name with weird punctuation is rejected
+        response = sendCommandToServer("Fr_d: look");
+        assertTrue(response.contains("valid"));
+        assertTrue(response.contains("name"));
+    }
+
 
 
 

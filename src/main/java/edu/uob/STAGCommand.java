@@ -6,8 +6,8 @@ import java.util.Objects;
 
 public class STAGCommand {
 
-    private ArrayList<String> commandTokens;
-    private GameModel gameModel;
+    private final ArrayList<String> commandTokens;
+    private final GameModel gameModel;
     private String currentPlayerName;
 
     private Player currentPlayerObject;
@@ -27,34 +27,29 @@ public class STAGCommand {
 
     public String interpretSTAGCommand(){
         String commandResponse = "Command not recognised";
-        getPlayerNameFromCommand();
-        Player potentialPlayer = gameModel.getPlayerFromName(currentPlayerName);
-        if(potentialPlayer != null){
-            currentPlayerObject = potentialPlayer;
+        if(!isPlayerNameValid()){
+            return "Enter a valid player name";
         }
-        else{
-            gameModel.createPlayerFromName(currentPlayerName);
-            currentPlayerObject = gameModel.getPlayerFromName(currentPlayerName);
-        }
+        setUpPlayer();
         currentLocation = currentPlayerObject.getCurrentLocation();
         boolean actionExecuted = false;
-        for(String token : commandTokens){
-            if(token.toLowerCase().contains("look")){
+        for(String commandToken : commandTokens){
+            if(commandToken.toLowerCase().contains("look")){
                 commandResponse = interpretLookCommand();
             }
-            if(token.toLowerCase().contains("goto")){
+            if(commandToken.toLowerCase().contains("goto")){
                 commandResponse = interpretGotoCommand();
             }
-            if(token.toLowerCase().contains("get")){
+            if(commandToken.toLowerCase().contains("get")){
                 commandResponse = interpretGetCommand();
             }
-            if(token.toLowerCase().contains("inv") || token.toLowerCase().contains("inventory")){
+            if(commandToken.toLowerCase().contains("inv") || commandToken.toLowerCase().contains("inventory")){
                 commandResponse = interpretInvCommand();
             }
-            if(token.toLowerCase().contains("drop")){
+            if(commandToken.toLowerCase().contains("drop")){
                 commandResponse = interpretDropCommand();
             }
-            if(token.toLowerCase().contains("health")){
+            if(commandToken.toLowerCase().contains("health")){
                 commandResponse = interpretHealthCommand();
             }
             if(actionCommandIsValid() && !actionExecuted){
@@ -63,23 +58,38 @@ public class STAGCommand {
             }
         }
         if(currentPlayerObject.getPlayerHealth() == 0){
-            currentPlayerObject.killPlayer();
-            commandResponse = "You died and lost all of your items, you must return to the start of the game";
+            commandResponse = getPlayerDeathResponse();
         }
         return commandResponse;
     }
 
-
-    private void getPlayerNameFromCommand(){
-        String playerName = commandTokens.get(0);
-        if(playerName.contains(":")) {
-            playerName = playerName.replaceAll(":$", ""); //remove colon
-            playerName = playerName.toLowerCase(); // "Simon" is the same as "simon" - this is wrong
+    private void setUpPlayer(){
+        Player potentialPlayer = gameModel.getPlayerFromName(currentPlayerName);
+        if(potentialPlayer != null){
+            currentPlayerObject = potentialPlayer;
         }
         else{
-            playerName = null;
+            gameModel.createPlayerFromName(currentPlayerName);
+            currentPlayerObject = gameModel.getPlayerFromName(currentPlayerName);
         }
-        currentPlayerName = playerName;
+    }
+
+    private boolean isPlayerNameValid(){
+        String potentialPlayerName = commandTokens.get(0);
+        if(isPlayerNameValid(potentialPlayerName)) {
+            currentPlayerName = potentialPlayerName;
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isPlayerNameValid(String playerName){
+        return playerName.matches("^[a-zA-Z '-]+$");
+    }
+
+    private String getPlayerDeathResponse(){
+        currentPlayerObject.killPlayer();
+        return "You died and lost all of your items, you must return to the start of the game";
     }
 
     private String interpretLookCommand(){
@@ -200,11 +210,11 @@ public class STAGCommand {
     }
 
     private boolean actionCommandIsValid(){
-        HashSet<GameAction> gameActionHashSet = commandContainsKeyphrase();
+        HashSet<GameAction> gameActionHashSet = commandContainsKeyPhrase();
         if(gameActionHashSet == null){
             return false;
         }
-        GameAction gameAction = subjectInCommandIsInGameAction(gameActionHashSet);
+        GameAction gameAction = findGameActionMatchingSubject(gameActionHashSet);
         if(gameAction == null){
             return false;
         }
@@ -212,7 +222,7 @@ public class STAGCommand {
         return allSubjectsAreAvailable(gameAction);
     }
 
-    private HashSet<GameAction> commandContainsKeyphrase(){
+    private HashSet<GameAction> commandContainsKeyPhrase(){
         for(String token: commandTokens){
             HashSet<GameAction> gameActionHashSet = gameModel.getGameActionHashSet(token);
             if(gameActionHashSet != null){
@@ -223,13 +233,18 @@ public class STAGCommand {
     }
 
     //check if hashset contains subject
-    private GameAction subjectInCommandIsInGameAction(HashSet<GameAction> gameActionHashSet){
+    private GameAction findGameActionMatchingSubject(HashSet<GameAction> gameActionHashSet){
         for(GameAction gameAction: gameActionHashSet){
-            for(String token: commandTokens){
-                Subject subject = (Subject) gameAction.getSubjectEntityFromName(token);
-                if(subject != null){
-                    return gameAction;
-                }
+            return isSubjectInCommand(gameAction);
+        }
+        return null;
+    }
+
+    private GameAction isSubjectInCommand(GameAction gameAction){
+        for(String commandToken: commandTokens){
+            Subject commandSubject = (Subject) gameAction.getSubjectEntityFromName(commandToken);
+            if(commandSubject != null){
+                return gameAction;
             }
         }
         return null;
