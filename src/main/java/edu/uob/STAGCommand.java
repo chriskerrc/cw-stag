@@ -293,7 +293,6 @@ public class STAGCommand {
             if(Objects.equals(consumableName, "health")){
                 currentPlayerObject.decreasePlayerHealth();
             }
-            //update the above, so that entities in different locations can be consumed (not just those in current location)
         }
     }
 

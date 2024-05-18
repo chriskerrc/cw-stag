@@ -52,7 +52,7 @@ public final class GameServer {
             Tokenizer commandTokenizer = new Tokenizer(command);
             ArrayList<String> commandTokens = commandTokenizer.tokenizeCommand();
             if (commandTokens == null) {
-                return "Invalid command: missing colon after name?";
+                return "Invalid command: missing colon before name?";
             }
             STAGCommand stagCommand = new STAGCommand(commandTokens, gameModel);
             return stagCommand.interpretSTAGCommand();

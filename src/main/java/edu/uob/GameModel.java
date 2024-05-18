@@ -259,7 +259,6 @@ public class GameModel {
                 gameLocation.removeEntity(entityName);
                 return movedEntity;
             }
-
         }
         return null;
     }
