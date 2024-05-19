@@ -94,15 +94,15 @@ public class ParseEntitiesTests {
 
         //paths
 
-        HashSet<Location> cabinDestinations = gameModel.getDestinationsFromLocation(cabin.getName());
+        HashSet<Location> cabinDestinations = gameModel.getDestinations(cabin.getName());
         Location cabinDestination = cabinDestinations.stream().findFirst().orElse(null);
         assert cabinDestination != null;
         assertEquals("forest", cabinDestination.getName());
-        HashSet<Location> forestDestinations = gameModel.getDestinationsFromLocation(cellar.getName());
+        HashSet<Location> forestDestinations = gameModel.getDestinations(cellar.getName());
         Location forestDestination = forestDestinations.stream().findFirst().orElse(null);
         assert forestDestination != null;
         assertEquals("cabin", forestDestination.getName());
-        HashSet<Location> cellarDestinations = gameModel.getDestinationsFromLocation(cellar.getName());
+        HashSet<Location> cellarDestinations = gameModel.getDestinations(cellar.getName());
         Location cellarDestination = cellarDestinations.stream().findFirst().orElse(null);
         assert cellarDestination != null;
         assertEquals("cabin", cellarDestination.getName());
