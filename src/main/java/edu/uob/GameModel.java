@@ -188,36 +188,49 @@ public class GameModel {
         }
     }
 
-    //break up this giant method
     private void storeEachAction(Element actionElement) {
         GameAction gameAction = new GameAction();
-        Element actionSubjects = (Element)actionElement.getElementsByTagName("subjects").item(0);
-        NodeList subjectsNodeList = actionSubjects.getElementsByTagName("entity");
-        for(int i = 0; i < subjectsNodeList.getLength(); i++){
-            String subjectName = subjectsNodeList.item(i).getTextContent();
-            Subject actionSubject = new Subject(subjectName);
-            gameAction.addSubjectEntity(actionSubject);
+        storeActionEntities(actionElement, gameAction, "subjects");
+        storeActionEntities(actionElement, gameAction, "produced");
+        storeActionEntities(actionElement, gameAction, "consumed");
+        storeActionNarration(actionElement, gameAction);
+        storeActionTriggers(actionElement, gameAction);
+    }
+
+    private void storeActionEntities(Element actionElement, GameAction gameAction, String tagName){
+        Element actionEntities = (Element)actionElement.getElementsByTagName(tagName).item(0);
+        NodeList entityNodeList = actionEntities.getElementsByTagName("entity");
+        if(entityNodeList.getLength() > 0){
+            for(int i = 0; i < entityNodeList.getLength(); i++){
+                String entityName = entityNodeList.item(i).getTextContent();
+                createActionEntities(tagName, entityName, gameAction);
+            }
         }
-        Element actionProducts = (Element)actionElement.getElementsByTagName("produced").item(0);
-        NodeList productsNodeList = actionProducts.getElementsByTagName("entity");
-        if(productsNodeList.getLength() > 0){
-            for(int i = 0; i < productsNodeList.getLength(); i++){
-                String productName = productsNodeList.item(i).getTextContent();
-                Product actionProduct = new Product(productName);
+    }
+
+    private void createActionEntities(String tagName, String entityName, GameAction gameAction){
+        switch (tagName) {
+            case "subjects":
+                Subject actionSubject = new Subject(entityName);
+                gameAction.addSubjectEntity(actionSubject);
+                break;
+            case "produced":
+                Product actionProduct = new Product(entityName);
                 gameAction.addProductEntity(actionProduct);
-            }
-        }
-        Element actionConsumables = (Element)actionElement.getElementsByTagName("consumed").item(0);
-        NodeList consumablesNodeList = actionConsumables.getElementsByTagName("entity");
-        if(consumablesNodeList.getLength() > 0){
-            for(int i = 0; i < consumablesNodeList.getLength(); i++){
-                String consumableName = consumablesNodeList.item(i).getTextContent();
-                Consumable actionConsumable = new Consumable(consumableName);
+                break;
+            case "consumed":
+                Consumable actionConsumable = new Consumable(entityName);
                 gameAction.addConsumableEntity(actionConsumable);
-            }
+                break;
         }
+    }
+
+    private void storeActionNarration(Element actionElement, GameAction gameAction){
         Element actionNarration = (Element)actionElement.getElementsByTagName("narration").item(0);
         gameAction.setNarration(actionNarration.getTextContent());
+    }
+
+    private void storeActionTriggers(Element actionElement, GameAction gameAction){
         Element actionTriggers = (Element)actionElement.getElementsByTagName("triggers").item(0);
         NodeList triggersNodeList = actionTriggers.getElementsByTagName("keyphrase");
         for(int i = 0; i < triggersNodeList.getLength(); i++){

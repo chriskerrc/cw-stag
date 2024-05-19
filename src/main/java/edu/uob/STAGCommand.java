@@ -184,20 +184,25 @@ public class STAGCommand {
         return false;
     }
 
-    //refactor this to use stream
     private Artefact getArtefactFromInventory(ArrayList<Artefact> inventoryList){
         if(inventoryList.isEmpty()){
             return null;
         }
-        //too deeply nested
         for(String commandToken: commandTokens){
-            for(Artefact inventoryArtefact : inventoryList){
-                if(Objects.equals(inventoryArtefact.getName(), commandToken)){
-                    matchingArtefactName = inventoryArtefact.getName();
-                    return inventoryArtefact;
-                }
+            Artefact inventoryArtefact = findArtefactFromName(inventoryList, commandToken);
+            if(inventoryArtefact != null){
+                return inventoryArtefact;
             }
+        }
+        return null;
+    }
 
+    private Artefact findArtefactFromName(ArrayList<Artefact> inventoryList, String commandToken){
+        for(Artefact inventoryArtefact : inventoryList){
+            if(Objects.equals(inventoryArtefact.getName(), commandToken)){
+                matchingArtefactName = inventoryArtefact.getName();
+                return inventoryArtefact;
+            }
         }
         return null;
     }
