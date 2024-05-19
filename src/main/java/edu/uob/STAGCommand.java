@@ -47,7 +47,7 @@ public class STAGCommand {
             if(commandToken.contains("health")){
                 commandResponse = interpretHealthCommand();
             }
-            if(actionCommandIsValid() && !actionExecuted){
+            if(isActionCommandValid() && !actionExecuted){
                 commandResponse = interpretActionCommand();
                 actionExecuted = true;
             }
@@ -58,6 +58,7 @@ public class STAGCommand {
         return commandResponse;
     }
 
+    //check if player exists and create new player if needed
     private void setUpPlayer(){
         Player potentialPlayer = gameModel.getPlayerFromName(currentPlayerName);
         if(potentialPlayer != null){
@@ -69,6 +70,7 @@ public class STAGCommand {
         }
     }
 
+    //if player name is valid, it will be stored
     private boolean isPlayerNameSet(){
         String potentialPlayerName = commandTokens.get(0);
         if(isPlayerNameValid(potentialPlayerName)) {
@@ -88,6 +90,7 @@ public class STAGCommand {
         return "You died and lost all of your items. You return to the start";
     }
 
+    //look includes location, gameEntities, other player(s) and paths
     private String interpretLookCommand(){
         String locationDescription = currentLocation.getDescription();
         StringBuilder responseBuilder = new StringBuilder();
@@ -111,8 +114,9 @@ public class STAGCommand {
         return responseBuilder.toString();
     }
 
+    //matchingDestinationName is destination in command
     private String interpretGotoCommand(){
-        if(!checkDestinationIsValid()){
+        if(!isDestinationValid()){
             return "Did you provide a location to go to?";
         }
         HashSet<Location> destinationsSet = gameModel.getDestinations(currentLocation.getName());
@@ -125,8 +129,9 @@ public class STAGCommand {
             return "You can't get there from here";
     }
 
+    //matchingArtefactName is artefact in command
     private String interpretGetCommand(){
-        if(!commandHasArtefactInRoom(currentLocation)){
+        if(!isArtefactInRoom(currentLocation)){
             return "That artefact isn't in this location";
         }
         Artefact gotArtefact = (Artefact) currentLocation.removeEntity(matchingArtefactName);
@@ -136,7 +141,7 @@ public class STAGCommand {
 
     private String interpretDropCommand(){
         ArrayList<Artefact> inventoryList = currentPlayerObject.getInventoryList();
-        Artefact possibleArtefact = getArtefactFromInventory(inventoryList);
+        Artefact possibleArtefact = getArtefactInventory(inventoryList);
         if(possibleArtefact == null){
             return "You don't have that artefact or it doesn't exist";
         }
@@ -162,7 +167,7 @@ public class STAGCommand {
         return "Your current health level is " + healthNumber;
     }
 
-    private boolean checkDestinationIsValid(){
+    private boolean isDestinationValid(){
         for(String commandToken: commandTokens){
             Location potentialLocation = gameModel.getLocationFromName(commandToken);
             String gameLocationName = null;
@@ -177,7 +182,7 @@ public class STAGCommand {
         return false;
     }
 
-    private boolean commandHasArtefactInRoom(Location currentLocation){
+    private boolean isArtefactInRoom(Location currentLocation){
         if(currentLocation.isNoArtefact()){
             return false;
         }
@@ -191,7 +196,8 @@ public class STAGCommand {
         return false;
     }
 
-    private Artefact getArtefactFromInventory(ArrayList<Artefact> inventoryList){
+    //Get artefact from inventory
+    private Artefact getArtefactInventory(ArrayList<Artefact> inventoryList){
         if(inventoryList.isEmpty()){
             return null;
         }
@@ -204,6 +210,7 @@ public class STAGCommand {
         return null;
     }
 
+    //Does artefact in inventory match artefact in command?
     private Artefact findArtefact(ArrayList<Artefact> invList, String commandToken){
         for(Artefact inventoryArtefact : invList){
             if(Objects.equals(inventoryArtefact.getName(), commandToken)){
@@ -214,22 +221,22 @@ public class STAGCommand {
         return null;
     }
 
-    private boolean actionCommandIsValid(){
-        HashSet<GameAction> gameActionSet = commandContainsKeyPhrase();
+    private boolean isActionCommandValid(){
+        HashSet<GameAction> gameActionSet = commandHasKeyPhrase();
         if(gameActionSet == null){
             return false;
         }
-        GameAction gameAction = getGameActionMatchingSubject(gameActionSet);
+        GameAction gameAction = getActionMatchSubject(gameActionSet);
         if(gameAction == null){
             return false;
         }
         currentGameAction = gameAction;
-        return allSubjectsAreAvailable(gameAction);
+        return allSubjectsAreThere(gameAction);
     }
 
-    private HashSet<GameAction> commandContainsKeyPhrase(){
-        for(String token: commandTokens){
-            HashSet<GameAction> gameActionHashSet = gameModel.getGameActionHashSet(token);
+    private HashSet<GameAction> commandHasKeyPhrase(){
+        for(String commandToken: commandTokens){
+            HashSet<GameAction> gameActionHashSet = gameModel.getGameActionHashSet(commandToken);
             if(gameActionHashSet != null){
                 return gameActionHashSet;
             }
@@ -237,8 +244,8 @@ public class STAGCommand {
         return null;
     }
 
-    //check if hashset contains subject
-    private GameAction getGameActionMatchingSubject(HashSet<GameAction> gameActionHashSet){
+    //check if hashset of gameActions contains subject
+    private GameAction getActionMatchSubject(HashSet<GameAction> gameActionHashSet){
         for(GameAction gameAction: gameActionHashSet){
             return isSubjectInCommand(gameAction);
         }
@@ -255,7 +262,8 @@ public class STAGCommand {
         return null;
     }
 
-    private Boolean allSubjectsAreAvailable(GameAction gameAction){
+    //check subjects are present
+    private Boolean allSubjectsAreThere(GameAction gameAction){
         ArrayList<Subject> subjectList = gameAction.getSubjects();
         int matchingSubjects = 0;
         Location currentLocation = currentPlayerObject.getCurrentLocation();
@@ -276,6 +284,7 @@ public class STAGCommand {
         return currentGameAction.getNarration();
     }
 
+    //Consume entities from inventory, location, consume location, consume health
     private void consumeEntities() {
         ArrayList<Consumable> consumableEntities = currentGameAction.getConsumables();
         Artefact droppedArtefact;
@@ -301,6 +310,7 @@ public class STAGCommand {
         }
     }
 
+    //Produce entities from anywhere in game and add them to current location
     private void produceEntities(){
         ArrayList<Product> producedEntities = currentGameAction.getProducts();
         for (Product productEntity : producedEntities) {

@@ -23,6 +23,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+//A class to store game state
 public class GameModel {
 
     private final ArrayList<Location> locationsList = new ArrayList<>();
@@ -66,6 +67,7 @@ public class GameModel {
             processLocationObjects(graphLocation, gameLocation);
             locationsList.add(gameLocation);
         }
+        //start location is always the first in the list i.e. entities file
         startLocation = locationsList.get(0);
         storePaths(graphSections);
     }
@@ -111,6 +113,7 @@ public class GameModel {
     }
 
     private void storePaths(ArrayList<Graph> graphSections){
+        //Paths are always at the end of the entities file
         ArrayList<Edge> locationPaths = graphSections.get(1).getEdges();
         for(Edge locationPath : locationPaths){
             Node fromLocation = locationPath.getSource().getNode();
@@ -120,9 +123,11 @@ public class GameModel {
             String toName = toLocation.getId().getId();
             Location endLocation = getLocationFromName(toName);
             HashSet<Location> locationHashSet;
+            //if it's a location we've seen before
             if(pathsMap.containsKey(fromName)){
                 locationHashSet = pathsMap.get(fromName);
             }
+            //if it's a new location
             else{
                 locationHashSet = new HashSet<>();
             }
@@ -209,6 +214,7 @@ public class GameModel {
     }
 
     private void addActionEntities(String tagName, String entityName, GameAction gameAction){
+        //tagName corresponds to entity file
         switch (tagName) {
             case "subjects" -> {
                 Subject actionSubject = new Subject(entityName);
@@ -280,15 +286,16 @@ public class GameModel {
         if(fromLocation == null || toLocation == null){
             return;
         }
-        HashSet<Location> destinations = pathsMap.get(fromLocation.getName());
-        if(destinations == null){
+        HashSet<Location> destinationsSet = pathsMap.get(fromLocation.getName());
+        if(destinationsSet == null){
             return;
         }
+        //new path to distinct location
         if(isNewPath){
-            destinations.add(toLocation);
+            destinationsSet.add(toLocation);
         }
         else{
-            destinations.remove(toLocation);
+            destinationsSet.remove(toLocation);
         }
     }
 }

@@ -9,12 +9,8 @@ import java.net.Socket;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
 import org.xml.sax.SAXException;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 public final class GameServer {
 
@@ -104,6 +100,7 @@ public final class GameServer {
         }
     }
 
+    //Method to initialise gameModel for each server instance
     private void setUpGameModel(File entitiesFile, File actionsFile) {
         try {
             gameModel.loadEntitiesFile(entitiesFile);
