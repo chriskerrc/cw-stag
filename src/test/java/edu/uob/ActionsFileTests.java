@@ -1,7 +1,6 @@
 package edu.uob;
 
 import org.junit.jupiter.api.Test;
-import java.util.ArrayList;
 import java.io.IOException;
 import java.io.File;
 import javax.xml.parsers.ParserConfigurationException;
@@ -11,7 +10,6 @@ import org.xml.sax.SAXException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

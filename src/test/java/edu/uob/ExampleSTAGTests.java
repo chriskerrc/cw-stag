@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.nio.file.Paths;
-import java.io.IOException;
 import java.time.Duration;
 
 class ExampleSTAGTests {
