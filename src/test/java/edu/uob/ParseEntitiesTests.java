@@ -4,19 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.File;
 import java.util.HashSet;
-import java.util.Iterator;
-
-import com.alexmerz.graphviz.Parser;
 import com.alexmerz.graphviz.ParseException;
 import com.alexmerz.graphviz.objects.Graph;
-import com.alexmerz.graphviz.objects.Node;
-import com.alexmerz.graphviz.objects.Edge;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ParseEntitiesTests {
@@ -94,15 +85,15 @@ public class ParseEntitiesTests {
 
         //paths
 
-        HashSet<Location> cabinDestinations = gameModel.getDestinationsFromLocation(cabin.getName());
+        HashSet<Location> cabinDestinations = gameModel.getDestinations(cabin.getName());
         Location cabinDestination = cabinDestinations.stream().findFirst().orElse(null);
         assert cabinDestination != null;
         assertEquals("forest", cabinDestination.getName());
-        HashSet<Location> forestDestinations = gameModel.getDestinationsFromLocation(cellar.getName());
+        HashSet<Location> forestDestinations = gameModel.getDestinations(cellar.getName());
         Location forestDestination = forestDestinations.stream().findFirst().orElse(null);
         assert forestDestination != null;
         assertEquals("cabin", forestDestination.getName());
-        HashSet<Location> cellarDestinations = gameModel.getDestinationsFromLocation(cellar.getName());
+        HashSet<Location> cellarDestinations = gameModel.getDestinations(cellar.getName());
         Location cellarDestination = cellarDestinations.stream().findFirst().orElse(null);
         assert cellarDestination != null;
         assertEquals("cabin", cellarDestination.getName());

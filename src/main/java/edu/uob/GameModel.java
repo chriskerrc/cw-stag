@@ -23,6 +23,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+//A class to store game state
 public class GameModel {
 
     private final ArrayList<Location> locationsList = new ArrayList<>();
@@ -46,8 +47,8 @@ public class GameModel {
     }
 
     public Document parseActions() throws IOException, ParserConfigurationException, SAXException {
-        DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        return documentBuilder.parse(actionsFile);
+        DocumentBuilder docBuild = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        return docBuild.parse(actionsFile);
     }
 
     //HANDLE ENTITIES
@@ -63,14 +64,15 @@ public class GameModel {
             locationDescription = locationDetails.getAttribute("description");
             Location gameLocation = new Location(locationName, locationDescription);
             //add artefacts, characters, furniture
-            processLocationObjects(graphLocation, gameLocation);
+            storeLocationObjects(graphLocation, gameLocation);
             locationsList.add(gameLocation);
         }
+        //start location is always the first in the list i.e. entities file
         startLocation = locationsList.get(0);
         storePaths(graphSections);
     }
 
-    private void processLocationObjects(Graph graphLocation, Location gameLocation){
+    private void storeLocationObjects(Graph graphLocation, Location gameLocation){
         ArrayList<Graph> subGraphs = graphLocation.getSubgraphs();
         ArrayList<Node> objectNodes;
         for(Graph subGraph : subGraphs){
@@ -89,44 +91,47 @@ public class GameModel {
         }
     }
 
-    private void storeObjects(ArrayList<Node> objectNodes, Location gameLocation, String objectType){
+    private void storeObjects(ArrayList<Node> nodesList, Location location, String objType){
         String objectName;
         String objectDescription;
-        for (Node objectNode : objectNodes) {
+        for (Node objectNode : nodesList) {
             objectName = objectNode.getId().getId();
             objectDescription = objectNode.getAttribute("description");
-            if(Objects.equals(objectType, "artefacts")) {
+            if(Objects.equals(objType, "artefacts")) {
                 Artefact gameArtefact = new Artefact(objectName, objectDescription);
-                gameLocation.addEntity(gameArtefact);
+                location.addEntity(gameArtefact);
             }
-            if(Objects.equals(objectType, "furniture")) {
+            if(Objects.equals(objType, "furniture")) {
                 Furniture gameFurniture = new Furniture(objectName, objectDescription);
-                gameLocation.addEntity(gameFurniture);
+                location.addEntity(gameFurniture);
             }
-            if(Objects.equals(objectType, "characters")) {
+            if(Objects.equals(objType, "characters")) {
                 Character gameCharacter = new Character(objectName, objectDescription);
-                gameLocation.addEntity(gameCharacter);
+                location.addEntity(gameCharacter);
             }
         }
     }
 
     private void storePaths(ArrayList<Graph> graphSections){
+        //Paths are always at the end of the entities file
         ArrayList<Edge> locationPaths = graphSections.get(1).getEdges();
         for(Edge locationPath : locationPaths){
-            Node fromLocation = locationPath.getSource().getNode();
-            String fromName = fromLocation.getId().getId();
+            Node fromNode = locationPath.getSource().getNode();
+            String fromName = fromNode.getId().getId();
             Location startLocation = getLocationFromName(fromName);
-            Node toLocation = locationPath.getTarget().getNode();
-            String toName = toLocation.getId().getId();
-            Location endLocation = getLocationFromName(toName);
+            Node toNode = locationPath.getTarget().getNode();
+            String toName = toNode.getId().getId();
+            Location toLocation = getLocationFromName(toName);
             HashSet<Location> locationHashSet;
+            //if it's a location we've seen before
             if(pathsMap.containsKey(fromName)){
                 locationHashSet = pathsMap.get(fromName);
             }
+            //if it's a new location
             else{
                 locationHashSet = new HashSet<>();
             }
-            locationHashSet.add(endLocation);
+            locationHashSet.add(toLocation);
             pathsMap.put(startLocation.getName(),locationHashSet);
         }
     }
@@ -170,7 +175,7 @@ public class GameModel {
         return startLocation;
     }
 
-    public HashSet<Location> getDestinationsFromLocation(String startLocationName){
+    public HashSet<Location> getDestinations(String startLocationName){
         return pathsMap.get(startLocationName);
     }
 
@@ -188,36 +193,50 @@ public class GameModel {
         }
     }
 
-    //break up this giant method
     private void storeEachAction(Element actionElement) {
         GameAction gameAction = new GameAction();
-        Element actionSubjects = (Element)actionElement.getElementsByTagName("subjects").item(0);
-        NodeList subjectsNodeList = actionSubjects.getElementsByTagName("entity");
-        for(int i = 0; i < subjectsNodeList.getLength(); i++){
-            String subjectName = subjectsNodeList.item(i).getTextContent();
-            Subject actionSubject = new Subject(subjectName);
-            gameAction.addSubjectEntity(actionSubject);
-        }
-        Element actionProducts = (Element)actionElement.getElementsByTagName("produced").item(0);
-        NodeList productsNodeList = actionProducts.getElementsByTagName("entity");
-        if(productsNodeList.getLength() > 0){
-            for(int i = 0; i < productsNodeList.getLength(); i++){
-                String productName = productsNodeList.item(i).getTextContent();
-                Product actionProduct = new Product(productName);
-                gameAction.addProductEntity(actionProduct);
+        storeEntities(actionElement, gameAction, "subjects");
+        storeEntities(actionElement, gameAction, "produced");
+        storeEntities(actionElement, gameAction, "consumed");
+        storeActionNarration(actionElement, gameAction);
+        storeActionTriggers(actionElement, gameAction);
+    }
+
+    private void storeEntities(Element actionElement, GameAction gameAction, String tagName){
+        Element actionEntities = (Element)actionElement.getElementsByTagName(tagName).item(0);
+        NodeList entityNodeList = actionEntities.getElementsByTagName("entity");
+        if(entityNodeList.getLength() > 0){
+            for(int i = 0; i < entityNodeList.getLength(); i++){
+                String entityName = entityNodeList.item(i).getTextContent();
+                addActionEntities(tagName, entityName, gameAction);
             }
         }
-        Element actionConsumables = (Element)actionElement.getElementsByTagName("consumed").item(0);
-        NodeList consumablesNodeList = actionConsumables.getElementsByTagName("entity");
-        if(consumablesNodeList.getLength() > 0){
-            for(int i = 0; i < consumablesNodeList.getLength(); i++){
-                String consumableName = consumablesNodeList.item(i).getTextContent();
-                Consumable actionConsumable = new Consumable(consumableName);
+    }
+
+    private void addActionEntities(String tagName, String entityName, GameAction gameAction){
+        //tagName corresponds to entity file
+        switch (tagName) {
+            case "subjects" -> {
+                Subject actionSubject = new Subject(entityName);
+                gameAction.addSubjectEntity(actionSubject);
+            }
+            case "produced" -> {
+                Product actionProduct = new Product(entityName);
+                gameAction.addProductEntity(actionProduct);
+            }
+            case "consumed" -> {
+                Consumable actionConsumable = new Consumable(entityName);
                 gameAction.addConsumableEntity(actionConsumable);
             }
         }
+    }
+
+    private void storeActionNarration(Element actionElement, GameAction gameAction){
         Element actionNarration = (Element)actionElement.getElementsByTagName("narration").item(0);
         gameAction.setNarration(actionNarration.getTextContent());
+    }
+
+    private void storeActionTriggers(Element actionElement, GameAction gameAction){
         Element actionTriggers = (Element)actionElement.getElementsByTagName("triggers").item(0);
         NodeList triggersNodeList = actionTriggers.getElementsByTagName("keyphrase");
         for(int i = 0; i < triggersNodeList.getLength(); i++){
@@ -250,7 +269,7 @@ public class GameModel {
         }
     }
 
-    public GameEntity getEntityFromItsCurrentLocation (String entityName) {
+    public GameEntity getEntityWhereItIs (String entityName) {
         for (Location gameLocation : locationsList) {
             GameEntity movedEntity = gameLocation.getEntityFromName(entityName);
             if(movedEntity != null){
@@ -261,21 +280,22 @@ public class GameModel {
         return null;
     }
 
-    public void updateLocationPath(String originName, String destinationName, boolean pathIsCreated){
-        Location fromLocation = getLocationFromName(originName);
-        Location toLocation = getLocationFromName(destinationName);
+    public void updateLocationPath(String fromName, String toName, boolean isNewPath){
+        Location fromLocation = getLocationFromName(fromName);
+        Location toLocation = getLocationFromName(toName);
         if(fromLocation == null || toLocation == null){
             return;
         }
-        HashSet<Location> destinations = pathsMap.get(fromLocation.getName());
-        if(destinations == null){
+        HashSet<Location> destinationsSet = pathsMap.get(fromLocation.getName());
+        if(destinationsSet == null){
             return;
         }
-        if(pathIsCreated){
-            destinations.add(toLocation);
+        //new path to distinct location
+        if(isNewPath){
+            destinationsSet.add(toLocation);
         }
         else{
-            destinations.remove(toLocation);
+            destinationsSet.remove(toLocation);
         }
     }
 }

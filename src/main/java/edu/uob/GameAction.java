@@ -26,7 +26,7 @@ public class GameAction
         actionNarration = inputNarration;
     }
 
-    public GameEntity getSubjectEntityFromName(String entityName){
+    public GameEntity getSubjectEntity(String entityName){
         for(GameEntity gameEntity : subjectEntities){
             if(Objects.equals(gameEntity.getName(), entityName)){
                 return gameEntity;
@@ -35,7 +35,7 @@ public class GameAction
         return null;
     }
 
-    public GameEntity getConsumedEntityFromName(String entityName){
+    public GameEntity getConsumedEntity(String entityName){
         for(GameEntity gameEntity : consumedEntities){
             if(Objects.equals(gameEntity.getName(), entityName)){
                 return gameEntity;
@@ -44,7 +44,7 @@ public class GameAction
         return null;
     }
 
-    public GameEntity getProducedEntityFromName(String entityName){
+    public GameEntity getProducedEntity(String entityName){
         for(GameEntity gameEntity : producedEntities){
             if(Objects.equals(gameEntity.getName(), entityName)){
                 return gameEntity;
@@ -57,15 +57,15 @@ public class GameAction
         return actionNarration;
     }
 
-    public ArrayList<Subject> getSubjectList(){
+    public ArrayList<Subject> getSubjects(){
         return subjectEntities;
     }
 
-    public ArrayList<Product> getProducedEntities() {
+    public ArrayList<Product> getProducts() {
         return producedEntities;
     }
 
-    public ArrayList<Consumable> getConsumableEntities() {
+    public ArrayList<Consumable> getConsumables() {
         return consumedEntities;
     }
 }

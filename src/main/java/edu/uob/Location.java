@@ -11,12 +11,9 @@ public class Location extends GameEntity {
         super(locationName, locationDescription);
     }
 
-    //add paths to locations
-
     public void addEntity(GameEntity newGameEntity){
         entityList.add(newGameEntity);
     }
-
 
     public GameEntity getEntityFromName(String entityName){
         for(GameEntity gameEntity : entityList){

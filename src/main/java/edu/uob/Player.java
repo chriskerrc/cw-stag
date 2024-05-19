@@ -32,7 +32,7 @@ public class Player {
         this.currentLocation = newLocation;
     }
 
-    public void addArtefactToInventory(Artefact pickedUpArtefact){
+    public void addArtefactInventory(Artefact pickedUpArtefact){
         inventoryList.add(pickedUpArtefact);
     }
 
@@ -48,7 +48,7 @@ public class Player {
 
     public void killPlayer(){
         emptyInventory();
-        movePlayerToStartLocation();
+        movePlayerToStart();
         resetPlayerHealth();
     }
 
@@ -60,7 +60,7 @@ public class Player {
         }
     }
 
-    private void movePlayerToStartLocation() {
+    private void movePlayerToStart() {
         currentLocation = gameModel.getStartLocation();
     }
 
@@ -72,7 +72,7 @@ public class Player {
         return inventoryList;
     }
 
-    public boolean subjectIsInInventory(String subjectName){
+    public boolean isSubjectInInventory(String subjectName){
         for (Artefact inventoryArtefact : inventoryList){
             if(Objects.equals(inventoryArtefact.getName(), subjectName)){
                 return true;

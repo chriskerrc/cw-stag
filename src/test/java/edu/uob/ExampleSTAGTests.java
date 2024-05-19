@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.nio.file.Paths;
-import java.io.IOException;
 import java.time.Duration;
 
 class ExampleSTAGTests {
@@ -61,7 +60,6 @@ class ExampleSTAGTests {
       sendCommandToServer("simon: goto forest");
       String response = sendCommandToServer("simon: look");
       response = response.toLowerCase();
-      System.out.println("Response to look command in test: " + response);
       assertTrue(response.contains("key"), "Failed attempt to use 'goto' command to move to the forest - there is no key in the current location");
   }
 
