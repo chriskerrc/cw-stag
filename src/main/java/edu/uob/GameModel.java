@@ -64,7 +64,7 @@ public class GameModel {
             locationDescription = locationDetails.getAttribute("description");
             Location gameLocation = new Location(locationName, locationDescription);
             //add artefacts, characters, furniture
-            processLocationObjects(graphLocation, gameLocation);
+            storeLocationObjects(graphLocation, gameLocation);
             locationsList.add(gameLocation);
         }
         //start location is always the first in the list i.e. entities file
@@ -72,7 +72,7 @@ public class GameModel {
         storePaths(graphSections);
     }
 
-    private void processLocationObjects(Graph graphLocation, Location gameLocation){
+    private void storeLocationObjects(Graph graphLocation, Location gameLocation){
         ArrayList<Graph> subGraphs = graphLocation.getSubgraphs();
         ArrayList<Node> objectNodes;
         for(Graph subGraph : subGraphs){
@@ -116,12 +116,12 @@ public class GameModel {
         //Paths are always at the end of the entities file
         ArrayList<Edge> locationPaths = graphSections.get(1).getEdges();
         for(Edge locationPath : locationPaths){
-            Node fromLocation = locationPath.getSource().getNode();
-            String fromName = fromLocation.getId().getId();
+            Node fromNode = locationPath.getSource().getNode();
+            String fromName = fromNode.getId().getId();
             Location startLocation = getLocationFromName(fromName);
-            Node toLocation = locationPath.getTarget().getNode();
-            String toName = toLocation.getId().getId();
-            Location endLocation = getLocationFromName(toName);
+            Node toNode = locationPath.getTarget().getNode();
+            String toName = toNode.getId().getId();
+            Location toLocation = getLocationFromName(toName);
             HashSet<Location> locationHashSet;
             //if it's a location we've seen before
             if(pathsMap.containsKey(fromName)){
@@ -131,7 +131,7 @@ public class GameModel {
             else{
                 locationHashSet = new HashSet<>();
             }
-            locationHashSet.add(endLocation);
+            locationHashSet.add(toLocation);
             pathsMap.put(startLocation.getName(),locationHashSet);
         }
     }
@@ -269,7 +269,7 @@ public class GameModel {
         }
     }
 
-    public GameEntity getEntityFromItsCurrentLocation (String entityName) {
+    public GameEntity getEntityWhereItIs (String entityName) {
         for (Location gameLocation : locationsList) {
             GameEntity movedEntity = gameLocation.getEntityFromName(entityName);
             if(movedEntity != null){
